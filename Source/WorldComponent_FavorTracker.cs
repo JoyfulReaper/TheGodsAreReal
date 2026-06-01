@@ -1,0 +1,84 @@
+﻿/**
+BSD 2-Clause License
+
+Copyright (c) 2026, Kyle Givler
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+
+ **/
+
+using System.Collections.Generic;
+using Verse;
+using RimWorld.Planet;
+
+namespace TheGodsAreReal
+{
+    public class WorldComponent_FavorTracker : WorldComponent
+    {
+        // We use the Pawn's unique ID as the key for performance
+        private Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
+
+        public WorldComponent_FavorTracker(World world) : base(world) { }
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            // This ensures your data persists across saves
+            Scribe_Collections.Look(ref pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
+        }
+
+        public void AddFavor(Pawn pawn, float amount)
+        {
+            int id = pawn.thingIDNumber;
+            if (!pawnFavor.ContainsKey(id))
+            {
+                pawnFavor[id] = 0f;
+            }
+            pawnFavor[id] += amount;
+        }
+
+        public float GetFavor(Pawn pawn)
+        {
+            if (pawnFavor.TryGetValue(pawn.thingIDNumber, out float favor))
+            {
+                return favor;
+            }
+            return 0f;
+        }
+
+        // DEBUG METHOD
+        public void DebugAddFavor(Pawn pawn, float amount)
+        {
+            AddFavor(pawn, amount);
+            float newFavor = GetFavor(pawn);
+            Log.Message($"[TheGodsAreReal] Debug: Added {amount} favor to {pawn.Name}. New total: {newFavor}");
+        }
+
+        // DEBUG METHOD
+        public void DebugRemoveFavor(Pawn pawn, float amount)
+        {
+            AddFavor(pawn, -amount);
+            float newFavor = GetFavor(pawn);
+            Log.Message($"[TheGodsAreReal] Debug: Added {amount} favor to {pawn.Name}. New total: {newFavor}");
+        }
+    }
+}

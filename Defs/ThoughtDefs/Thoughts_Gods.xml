@@ -1,0 +1,18 @@
+<Defs>
+  <ThoughtDef>
+    <defName>GodFavorThought</defName>
+    <workerClass>TheGodsAreReal.ThoughtWorker_GodFavor</workerClass> <!-- Links to your C# class -->
+    <stages>
+      <li>
+        <label>Divine Blessing</label>
+        <description>The gods look upon me with favor.</description>
+        <baseMoodEffect>10</baseMoodEffect>
+      </li>
+      <li>
+        <label>Divine Curse</label>
+        <description>The gods are displeased with me.</description>
+        <baseMoodEffect>-10</baseMoodEffect>
+      </li>
+    </stages>
+  </ThoughtDef>
+</Defs>
