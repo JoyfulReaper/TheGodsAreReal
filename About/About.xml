@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ModMetaData>
+  <packageId>KyleGivler.TheGodsAreReal</packageId>
+  <name>The Gods Are Real</name>
+  <author>Kyle Givler</author>
+  <description>The Gods Are Real is a high-performance framework designed to fundamentally alter how the game tracks and responds to divine or cosmic events on the Rim.
+
+The MVP (Minimum Viable Product) features:
+- Divine Influence System: Implements an optimized, low-overhead engine that tracks the favor of various deities, granting unique perks to loyal colonists and imposing severe consequences on the faithless.
+- Dynamic Boon and Bane Mechanics: Pawns can now receive "Divine Blessings" (stat buffs, unique abilities) or "Cosmic Curses" (environmental hazards, mood penalties) based on their actions and the favor of the gods.
+- Core Initialization: A robust, low-overhead hook into the RimWorld loading sequence to ensure seamless compatibility and minimal impact on TPS (Ticks Per Second).
+- Verified Integration: A stable foundation that confirms the mod is correctly loaded and ready to serve as the base for all future gameplay modules.
+
+Core Focus:
+- Technical Stability: Developed with high-performance standards in mind to ensure zero stuttering during complex divine event calculations.
+- Engine Integration: Deep hooks into internal systems to provide a seamless and immersive experience.
+
+Plans:
+- Expanding the divine pantheon with unique interactions.
+- Implementing complex, story-driven divine trials.
+- Continued optimization based on community feedback.
+
+Source Code:
+https://github.com/JoyfulReaper/TheGodsAreReal
+
+</description>
+  <supportedVersions>
+    <li>1.6</li>
+  </supportedVersions>
+  <modVersion>1.0.0</modVersion>
+</ModMetaData>
