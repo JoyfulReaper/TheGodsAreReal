@@ -57,13 +57,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GodDef.cs" />
-    <Compile Include="PreceptComp_GodFavor.cs" />
+    <Compile Include="Defs\GodDef.cs" />
+    <Compile Include="Precepts\PreceptComp_GodFavor.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TheGodsAreRealMod.cs" />
-    <Compile Include="TheGodsAreRealSetting.cs" />
-    <Compile Include="ThoughtWorker_GodFavor.cs" />
-    <Compile Include="WorldComponent_FavorTracker.cs" />
+    <Compile Include="Settings\TheGodsAreRealSettings.cs" />
+    <Compile Include="Thoughts\ThoughtWorker_GodFavor.cs" />
+    <Compile Include="Components\WorldComponent_FavorTracker.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
