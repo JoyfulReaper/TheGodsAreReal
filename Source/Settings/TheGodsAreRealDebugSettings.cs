@@ -15,7 +15,9 @@ namespace TheGodsAreReal.Settings
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
 
             int buttonCount = 6;
-            int pawnCount = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction.Count();
+            int pawnCount = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
+                           .Where(p => p.RaceProps.Humanlike).Count();
+
             float calculatedHeight = (buttonCount * 35f) + (pawnCount * 30f) + 200f; // 200f for padding/headers
 
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
