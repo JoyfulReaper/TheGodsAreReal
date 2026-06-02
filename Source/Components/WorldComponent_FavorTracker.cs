@@ -171,6 +171,10 @@ namespace TheGodsAreReal
         /// <param name="amount">The amount of favor to add, can be negative</param>
         public void AddFavor(Pawn pawn, float amount)
         {
+            if (pawn == null || !pawn.RaceProps.Humanlike)
+                return;
+
+
             if (pawn == null)
                 return;
 
@@ -246,7 +250,7 @@ namespace TheGodsAreReal
             for (int i = 0; i < pawns.Count; i++)
             {
                 Pawn p = pawns[i];
-                if (p.Ideo == ideo)
+                if (p.Ideo == ideo && p.RaceProps.Humanlike)
                 {
                     pawnCount++;
                     if (pawnFavor.TryGetValue(p.thingIDNumber, out float favor))
@@ -266,15 +270,16 @@ namespace TheGodsAreReal
             if (Scribe.mode == LoadSaveMode.Saving)
             {
                 HashSet<int> activePawnIds = new HashSet<int>();
-
                 List<Map> maps = Find.Maps;
+
                 for (int m = 0; m < maps.Count; m++)
                 {
                     var mapPawns = maps[m].mapPawns.AllPawns;
                     for (int p = 0; p < mapPawns.Count; p++)
                     {
-                        if (mapPawns[p] != null)
-                            activePawnIds.Add(mapPawns[p].thingIDNumber);
+                        Pawn pawn = mapPawns[p];
+                        if (pawn != null && pawn.RaceProps.Humanlike)
+                            activePawnIds.Add(pawn.thingIDNumber);
                     }
                 }
 

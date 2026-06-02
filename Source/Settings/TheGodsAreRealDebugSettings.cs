@@ -127,7 +127,7 @@ namespace TheGodsAreReal.Settings
                     Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
                 }
             }
-            
+
             DoDebugDataOverview(listing);
             DoPawnFavorList(listing);
 
@@ -167,7 +167,9 @@ namespace TheGodsAreReal.Settings
 
             listing.Label("--- Colony Favor Overview ---", 24f);
 
-            var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
+            var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
+                           .Where(p => p.RaceProps.Humanlike);
+
             foreach (Pawn p in pawns)
             {
                 float favor = favorTracker.GetFavor(p);
