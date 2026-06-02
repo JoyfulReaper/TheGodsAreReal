@@ -34,20 +34,37 @@ namespace TheGodsAreReal
     {
         protected override ThoughtState CurrentStateInternal(Pawn p)
         {
-            // 1. Get the tracker from the world
+            if (p.Ideo == null || p.Ideo.KeyDeityName == null)
+                return ThoughtState.Inactive;
+
             var tracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+            if (tracker == null)
+                return ThoughtState.Inactive;
 
-            // 2. Get the favor for this specific pawn
-            float favor = tracker.GetFavor(p);
+            float individualFavor = tracker.GetFavor(p);
+            float ideoFavor = tracker.GetIdeoFavor(p.Ideo);
 
-            // 3. Return a mood state based on the favor level
-            if (favor > 50f)
+            if (individualFavor < -75f)
             {
-                return ThoughtState.ActiveAtStage(0); // High favor: +Mood
+                return ThoughtState.ActiveAtStage(2); // "Divine Wrath" (Severe -Mood)
             }
-            if (favor < -50f)
+
+            if (individualFavor > 80f)
             {
-                return ThoughtState.ActiveAtStage(1); // Low favor: -Mood
+                // The colony is also highly aligned!
+                if (ideoFavor > 70f)
+                {
+                    return ThoughtState.ActiveAtStage(0); // "Divine Grace" (+Mood)
+                }
+
+                // The colony is dragging the god's name down
+                if (ideoFavor < -25f)
+                {
+                    return ThoughtState.ActiveAtStage(1); // "Sorrow of the Faithful" (Minor -Mood)
+                }
+
+                // Fallback: The colony is just average, but the pawn is still personally blessed
+                return ThoughtState.ActiveAtStage(0);
             }
 
             return ThoughtState.Inactive;

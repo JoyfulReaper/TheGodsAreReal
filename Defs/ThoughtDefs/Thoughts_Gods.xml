@@ -1,17 +1,27 @@
+<?xml version="1.0" encoding="utf-8" ?>
 <Defs>
   <ThoughtDef>
-    <defName>GodFavorThought</defName>
-    <workerClass>TheGodsAreReal.ThoughtWorker_GodFavor</workerClass> <!-- Links to your C# class -->
+    <defName>TheGodsAreReal_GodFavorThought</defName>
+    <workerClass>TheGodsAreReal.ThoughtWorker_GodFavor</workerClass>
+    <validWhileDespawned>true</validWhileDespawned>
     <stages>
+      <!-- Stage 0 -->
       <li>
-        <label>Divine Blessing</label>
-        <description>The gods look upon me with favor.</description>
-        <baseMoodEffect>10</baseMoodEffect>
+        <label>Divine Grace</label>
+        <description>The heavens look down upon me and our congregation with immense satisfaction. I feel a profound warmth.</description>
+        <baseMoodEffect>8</baseMoodEffect>
       </li>
+      <!-- Stage 1 -->
       <li>
-        <label>Divine Curse</label>
-        <description>The gods are displeased with me.</description>
-        <baseMoodEffect>-10</baseMoodEffect>
+        <label>Burden of the Faithless</label>
+        <description>I feel the grace of my deity, but the unpious nature of those around me stains this land. The god's patience is wearing thin.</description>
+        <baseMoodEffect>-4</baseMoodEffect>
+      </li>
+      <!-- Stage 2 -->
+      <li>
+        <label>Divine Wrath</label>
+        <description>A terrible chill grips my spine. I have utterly failed my creator, and their unseen anger weighs heavy on my soul.</description>
+        <baseMoodEffect>-12</baseMoodEffect>
       </li>
     </stages>
   </ThoughtDef>
