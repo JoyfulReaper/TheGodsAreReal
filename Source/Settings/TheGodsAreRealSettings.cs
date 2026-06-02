@@ -30,6 +30,7 @@ using UnityEngine;
 using Verse;
 using Verse.AI;
 using System.Linq;
+using TheGodsAreReal.Settings;
 
 namespace TheGodsAreReal
 {
@@ -46,7 +47,7 @@ namespace TheGodsAreReal
         public void DoSettingsWindowContents(Rect inRect)
         {
             if (Prefs.DevMode)
-                DoDebugSettingsWindowContents(inRect);
+                TheGodsAreRealDebugSettings.DoDebugSettingsWindowContents(inRect);
         }
     }
 }

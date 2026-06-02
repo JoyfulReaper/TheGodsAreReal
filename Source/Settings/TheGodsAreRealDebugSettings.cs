@@ -1,24 +1,22 @@
 ﻿using RimWorld;
-using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using UnityEngine;
 using Verse;
 using Verse.AI;
 
 namespace TheGodsAreReal.Settings
 {
-    internal class TheGodsAreRealDebugSettings
+    internal static class TheGodsAreRealDebugSettings
     {
-        public void DoDebugSettingsWindowContents(Rect inRect)
+        internal static void DoDebugSettingsWindowContents(Rect inRect)
         {
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
 
             Listing_Standard listing = new Listing_Standard();
             listing.Begin(inRect);
             listing.Label("Dev Mode Settings", 24f);
+
+            // Add 10 Favor
             if (listing.ButtonText("Add 10 Favor to Selected Pawn"))
             {
                 var pawn = Find.Selector.SingleSelectedThing as Pawn;
@@ -33,6 +31,8 @@ namespace TheGodsAreReal.Settings
                 }
             }
 
+
+            // Remove 10 favor
             if (listing.ButtonText("Remove 10 Favor from Selected Pawn"))
             {
                 var pawn = Find.Selector.SingleSelectedThing as Pawn;
@@ -47,19 +47,24 @@ namespace TheGodsAreReal.Settings
                 }
             }
 
+            // Pawn Favor Level
             if (listing.ButtonText("Selected Pawn's Favor Level"))
             {
-                var pawn = Find.Selector.SingleSelectedThing as Pawn;
-                if (pawn != null)
+                var selectedPawns = Find.Selector.SelectedPawns;
+                foreach (var selectedPawn in selectedPawns)
                 {
-                    Messages.Message($"{pawn.Name}: favor level: {favorTracker.GetFavor(pawn)}", MessageTypeDefOf.PositiveEvent);
-                }
-                else
-                {
-                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                    if (selectedPawn != null)
+                    {
+                        Messages.Message($"{selectedPawn.Name}: favor level: {favorTracker.GetFavor(selectedPawn)}", MessageTypeDefOf.PositiveEvent);
+                    }
+                    else
+                    {
+                        Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                    }
                 }
             }
 
+            // Force Prayer
             if (listing.ButtonText("Force Selected Pawn to pray"))
             {
                 var pawn = Find.Selector.SingleSelectedThing as Pawn;
@@ -86,6 +91,7 @@ namespace TheGodsAreReal.Settings
                 }
             }
 
+            // Ideo Favor
             if (listing.ButtonText("Ideology Favor Level for selected pawns Ideo"))
             {
                 var pawn = Find.Selector.SingleSelectedThing as Pawn;
