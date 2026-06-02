@@ -51,17 +51,13 @@
       <HintPath>H:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.CoreModule.dll</HintPath>
       <Private>False</Private>
     </Reference>
-    <Reference Include="UnityEngine.TextRenderingModule">
-      <HintPath>H:\SteamLibrary\steamapps\common\RimWorld\RimWorldWin64_Data\Managed\UnityEngine.TextRenderingModule.dll</HintPath>
-      <Private>False</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Patches\JobDriver_MeditatePatches.cs" />
+    <Compile Include="Patches\JobDriver_Meditate_MeditationTick.cs" />
     <Compile Include="Patches\MemoryThoughHandlerPatches.cs" />
     <Compile Include="Patches\PawnIdeoTrackerPatches.cs" />
+    <Compile Include="Patches\RitualOutcomeEffectWorker_FromQuality_Apply.cs" />
     <Compile Include="Patches\PawnPatches.cs" />
-    <Compile Include="Patches\RitualOutcomeEffectWorker_FromQualityPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Settings\TheGodsAreRealDebugSettings.cs" />
     <Compile Include="TheGodsAreRealMod.cs" />

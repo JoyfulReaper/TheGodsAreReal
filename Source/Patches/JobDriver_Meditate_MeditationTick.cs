@@ -33,7 +33,7 @@ using Verse;
 // TODO: Balance favor
 
 [HarmonyPatch(typeof(RimWorld.JobDriver_Meditate), "MeditationTick")]
-public static class JobDriver_MeditatePatches
+public static class JobDriver_Meditate_MeditationTick
 {
     static void Postfix(RimWorld.JobDriver_Meditate __instance)
     {

@@ -35,7 +35,7 @@ using Verse;
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(RitualOutcomeEffectWorker_FromQuality), nameof(RitualOutcomeEffectWorker_FromQuality.Apply))]
-    public static class RitualOutcomeEffectWorker_FromQualityPatches
+    public static class RitualOutcomeEffectWorker_FromQuality_Apply
     {
         public static void Postfix(RitualOutcomeEffectWorker_FromQuality __instance, float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
         {

@@ -34,7 +34,7 @@ using Verse;
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(MemoryThoughtHandler), nameof(MemoryThoughtHandler.TryGainMemory), new System.Type[] { typeof(Thought_Memory), typeof(Pawn) })]
-    public static class MemoryThoughHandlerPatches_TryGainMemory
+    public static class MemoryThoughHandler_TryGainMemory
     {
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
