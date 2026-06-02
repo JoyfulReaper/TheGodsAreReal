@@ -37,31 +37,62 @@ namespace TheGodsAreReal.Patches
     {
         public static void Postfix(RitualOutcomeEffectWorker_FromQuality __instance, float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
         {
-            if (Prefs.DevMode)
-            {
-                Log.Message($"[TheGodsAreReal: RitualOutcomeEffectWorker_FromQuality]: Postfix Fired.");
-            }
-
             //Calculate quality again
             float quality = Traverse.Create(__instance).Method("GetQuality", jobRitual, progress).GetValue<float>();
-            Log.Message($"[TheGodsAreReal] Ritual ended with quality: {quality}");
+
+            if (Prefs.DevMode)
+            {
+                Log.Message($"[TheGodsAreReal] Ritual ended with quality: {quality:F2}");
+            }
 
             var tracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+            if (tracker == null)
+                return;
 
-            // TODO: Calculate amount of favor to add/remove based on ritual quality
-            float favorChange = 5f;
+            // Step-logic to calculate favor based on standard RimWorld outcome brackets
+            float baseFavorChange = 0f;
+
+            if (quality < 0.25f) // Awful / Boring
+            {
+                baseFavorChange = -5f; // Displeased gods
+            }
+            else if (quality < 0.60f) // Flawed / Boring / Ordinary
+            {
+                baseFavorChange = 2f; // Minimal acknowledgment
+            }
+            else if (quality < 0.90f) // Satisfying / Fun
+            {
+                baseFavorChange = 8f; // Decent blessing
+            }
+            else // Spectacular / Unforgettable (0.90 to 1.0+)
+            {
+                baseFavorChange = 20f; // Divine favor rain
+            }
+
+            // Grab the leader/organizer of the ritual if available to give them a bonus/penalty
+            Pawn organizer = jobRitual?.Organizer;
 
             if (totalPresence != null)
             {
                 foreach (var kvp in totalPresence)
                 {
-                    if (kvp.Key != null)
+                    Pawn participant = kvp.Key;
+                    if (participant == null)
+                        continue;
+
+                    float individualFavorChange = baseFavorChange;
+
+                    // Give the organizer 50% extra impact for the outcome
+                    if (participant == organizer)
                     {
-                        tracker.AddFavor(kvp.Key, favorChange);
-                        if (Prefs.DevMode)
-                        {
-                            Log.Message($"[TheGodsAreReal]: Added {favorChange} favor to {kvp.Key.Name}");
-                        }
+                        individualFavorChange *= 1.5f;
+                    }
+
+                    tracker.AddFavor(participant, individualFavorChange);
+
+                    if (Prefs.DevMode)
+                    {
+                        Log.Message($"[TheGodsAreReal]: Processed ritual favor change of {individualFavorChange} for {participant.LabelShort}");
                     }
                 }
             }
