@@ -58,15 +58,11 @@ namespace TheGodsAreReal.Patches
             yield return new Command_Action
             {
                 defaultLabel = "DEV: Check Favor",
-                defaultDesc = $"Click to dump divine standing for {__instance.LabelShort} to the console.",
+                defaultDesc = $"Click to dump divine standing for {__instance.LabelShort} to the Message Area.",
                 icon = TexCommand.DesirePower,
                 action = delegate
                 {
-                    Log.Message($"========================================");
-                    Log.Message($"[TheGodsAreReal] DEBUG FOR {__instance.LabelShort.ToUpper()}:");
-                    Log.Message($"-> Individual Favor: {individualFavor:F1} / 100.0");
-                    Log.Message($"-> Ideo Avg Favor:   {ideoFavor:F1}");
-                    Log.Message($"========================================");
+                    Messages.Message($"[TheGodsAreReal] {__instance.LabelShort.ToUpper()}: -> Individual Favor: {individualFavor:F1} / 100.0 -> Ideo Avg Favor:   {ideoFavor:F1}", MessageTypeDefOf.NeutralEvent);
                 }
             };
         }
