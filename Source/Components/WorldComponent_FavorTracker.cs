@@ -40,49 +40,6 @@ namespace TheGodsAreReal
 
         public WorldComponent_FavorTracker(World world) : base(world) { }
 
-        public override void ExposeData()
-        {
-            base.ExposeData();
-
-            if (Scribe.mode == LoadSaveMode.Saving)
-            {
-                HashSet<int> activePawnIds = new HashSet<int>();
-                var allWorldPawns = Find.WorldPawns.AllPawnsAliveOrDead;
-
-                for (int i = 0; i < allWorldPawns.Count; i++)
-                {
-                    if (allWorldPawns[i] != null)
-                    {
-                        activePawnIds.Add(allWorldPawns[i].thingIDNumber);
-
-                    }
-                }
-
-                // Create a list of keys to remove so we don't mutate the dictionary during iteration
-                List<int> keysToRemove = new List<int>();
-                foreach (var key in pawnFavor.Keys)
-                {
-                    if(!activePawnIds.Contains(key))
-                    {
-                        keysToRemove.Add(key);
-                    }
-                }
-
-                // Purge Ghost Entries
-                for (int i = 0; i < keysToRemove.Count; i++)
-                {
-                    pawnFavor.Remove(keysToRemove[i]);
-                }
-
-                if (keysToRemove.Count > 0 && Prefs.DevMode)
-                {
-                    Log.Message($"[TheGodsAreReal] Purged {keysToRemove.Count} dead/discarded pawn IDs from favor tracking.");
-                }
-            }
-
-            Scribe_Collections.Look(ref pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
-        }
-
         public void AddFavor(Pawn pawn, float amount)
         {
             if (pawn == null)
@@ -110,6 +67,22 @@ namespace TheGodsAreReal
                 return favor;
             }
             return 0f;
+        }
+
+        public void ResetFavor(Pawn pawn, float newValue = 0)
+        {
+            if (pawn == null)
+                return;
+
+            if(pawnFavor.ContainsKey(pawn.thingIDNumber))
+            {
+                pawnFavor[pawn.thingIDNumber] = newValue;
+            }
+
+            if(Prefs.DevMode)
+            {
+                Log.Message($"[TheGodsAreReal] Reset favor for {pawn.LabelShort} due to ideology change.");
+            }
         }
 
         public bool PawnWorships(Pawn pawn, PreceptDef godPrecept)
@@ -142,7 +115,48 @@ namespace TheGodsAreReal
             return pawnCount > 0 ? totalFavor / pawnCount : 0f;
         }
 
+        public override void ExposeData()
+        {
+            base.ExposeData();
 
+            if (Scribe.mode == LoadSaveMode.Saving)
+            {
+                HashSet<int> activePawnIds = new HashSet<int>();
+                var allWorldPawns = Find.WorldPawns.AllPawnsAliveOrDead;
+
+                for (int i = 0; i < allWorldPawns.Count; i++)
+                {
+                    if (allWorldPawns[i] != null)
+                    {
+                        activePawnIds.Add(allWorldPawns[i].thingIDNumber);
+
+                    }
+                }
+
+                // Create a list of keys to remove so we don't mutate the dictionary during iteration
+                List<int> keysToRemove = new List<int>();
+                foreach (var key in pawnFavor.Keys)
+                {
+                    if (!activePawnIds.Contains(key))
+                    {
+                        keysToRemove.Add(key);
+                    }
+                }
+
+                // Purge Ghost Entries
+                for (int i = 0; i < keysToRemove.Count; i++)
+                {
+                    pawnFavor.Remove(keysToRemove[i]);
+                }
+
+                if (keysToRemove.Count > 0 && Prefs.DevMode)
+                {
+                    Log.Message($"[TheGodsAreReal] Purged {keysToRemove.Count} dead/discarded pawn IDs from favor tracking.");
+                }
+            }
+
+            Scribe_Collections.Look(ref pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
+        }
 
         // // // DEBUG // // //
 
