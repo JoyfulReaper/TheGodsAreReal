@@ -27,21 +27,34 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using HarmonyLib;
 using RimWorld;
+using TheGodsAreReal;
 using Verse;
 using Verse.AI;
 
-[HarmonyPatch(typeof(RimWorld.JobDriver_Meditate), "Notify_Starting")]
+[HarmonyPatch(typeof(RimWorld.JobDriver_Meditate), "MeditationTick")]
 public static class JobDriver_MeditatePatches
 {
     static void Postfix(RimWorld.JobDriver_Meditate __instance)
     {
         // Check if the current job is indeed the prayer one
-        if (__instance.job.def == JobDefOf.MeditatePray)
+        if (__instance.job?.def == JobDefOf.MeditatePray)
         {
             Pawn p = __instance.pawn;
-            Log.Message($"[TheGodsAreReal] {p.Name} has started praying!");
 
-            // TODO: Add favor or something
+            if(Find.TickManager.TicksGame % 250 == 0)
+            {
+                var favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+                if (favorTracker != null)
+                {
+                    float favorGained = 0.5f;
+                    favorTracker.AddFavor(p, favorGained);
+
+                    if (Prefs.DevMode)
+                    {
+                        Log.Message($"[TheGodsAreReal] {p.LabelShort} is actively praying. Gained {favorGained} favor.");
+                    }
+                }
+            }
         }
     }
 }
