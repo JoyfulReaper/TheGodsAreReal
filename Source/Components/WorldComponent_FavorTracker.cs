@@ -121,10 +121,10 @@ namespace TheGodsAreReal
                 Pawn p = pawns[i];
                 if (p.Ideo == ideo)
                 {
+                    pawnCount++;
                     if (pawnFavor.TryGetValue(p.thingIDNumber, out float favor))
                     {
                         totalFavor += favor;
-                        pawnCount++;
                     }
                 }
             }
