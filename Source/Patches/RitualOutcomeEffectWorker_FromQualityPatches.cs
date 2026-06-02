@@ -44,6 +44,7 @@ namespace TheGodsAreReal.Patches
 
             //Calculate quality again
             float quality = Traverse.Create(__instance).Method("GetQuality", jobRitual, progress).GetValue<float>();
+            var ritualIdeo = jobRitual.Ritual.ideo;
 
             if (Prefs.DevMode)
             {
@@ -93,7 +94,15 @@ namespace TheGodsAreReal.Patches
                         individualFavorChange *= 1.5f;
                     }
 
-                    tracker.AddFavor(participant, individualFavorChange);
+                    if (participant.Ideo == ritualIdeo)
+                    {
+                        tracker.AddFavor(participant, individualFavorChange);
+                    }
+                    else
+                    {
+                        individualFavorChange = -1f;
+                        tracker.AddFavor(participant, individualFavorChange);
+                    }
 
                     if (Prefs.DevMode)
                     {
