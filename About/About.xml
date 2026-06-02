@@ -1,28 +1,31 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ModMetaData>
   <packageId>KyleGivler.TheGodsAreReal</packageId>
-  <name>The Gods Are Real</name>
+  <name>The Gods Are Real [ALPHA]</name>
   <author>Kyle Givler</author>
-  <description>The Gods Are Real is a high-performance framework designed to fundamentally alter how the game tracks and responds to divine or cosmic events on the Rim.
+  <description>The Gods Are Real introduces a dynamic, per-pawn Favor system that brings your Ideology's deities to life. Devotion is no longer a static choice—it is a measurable, shifting resource that determines your pawn's standing with the divine.
 
-The MVP (Minimum Viable Product) features:
-- Divine Influence System: Implements an optimized, low-overhead engine that tracks the favor of various deities, granting unique perks to loyal colonists and imposing severe consequences on the faithless.
-- Dynamic Boon and Bane Mechanics: Pawns can now receive "Divine Blessings" (stat buffs, unique abilities) or "Cosmic Curses" (environmental hazards, mood penalties) based on their actions and the favor of the gods.
-- Core Initialization: A robust, low-overhead hook into the RimWorld loading sequence to ensure seamless compatibility and minimal impact on TPS (Ticks Per Second).
-- Verified Integration: A stable foundation that confirms the mod is correctly loaded and ready to serve as the base for all future gameplay modules.
+Please note this mod is in ACTIVE ALPHA DEVELOPMENT.
 
-Core Focus:
-- Technical Stability: Developed with high-performance standards in mind to ensure zero stuttering during complex divine event calculations.
-- Engine Integration: Deep hooks into internal systems to provide a seamless and immersive experience.
+Key Mechanics:
+- Favor System: Pawns are tracked from "Divine Wrath" (-100) to "Divine Grace" (+100).
+- Passive Decay: Favor is a fleeting resource; without active worship, it will naturally drift toward zero.
+- Divine Touch: A dynamic Hediff that reflects a pawn's standing, providing gameplay-impacting consequences based on their devotion.
+- Active Worship: Gain favor through scheduled Rituals, daily Ideology-based thoughts, and active Prayer at your Altars.
+
+Technical Focus:
+- High-Performance: Built with efficiency in mind, using optimized dictionary lookups and avoiding heavy overhead in hot code paths.
+- Seamless Integration: Deep hooks into core RimWorld systems for a natural, bug-resistant experience.
+- Self-Cleaning: Includes automated data sanitization to prevent save-file bloat.
 
 Plans:
-- Expanding the divine pantheon with unique interactions.
-- Implementing complex, story-driven divine trials.
-- Continued optimization based on community feedback.
+- More divine boons and event-based consequences for extreme favor levels.
+- Expanded mod settings to allow players to balance decay and gain rates to their preference.
+- Continued development based on community feedback.
 
 Source Code:
+Looking for contributors!
 https://github.com/JoyfulReaper/TheGodsAreReal
-
 </description>
   <supportedVersions>
     <li>1.6</li>

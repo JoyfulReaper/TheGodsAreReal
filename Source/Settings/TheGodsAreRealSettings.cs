@@ -36,11 +36,13 @@ namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
+        private string _version = "0.0.1";
+
         public string Version
         {
             get
             {
-                return "0.0.1";
+                return _version;
             }
         }
 
@@ -48,6 +50,12 @@ namespace TheGodsAreReal
         {
             if (Prefs.DevMode)
                 TheGodsAreRealDebugSettings.DoDebugSettingsWindowContents(inRect);
+        }
+
+        public override void ExposeData()
+        {
+            base.ExposeData();
+            Scribe_Values.Look(ref _version, "Version", _version);
         }
     }
 }

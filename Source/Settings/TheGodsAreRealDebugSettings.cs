@@ -8,12 +8,22 @@ namespace TheGodsAreReal.Settings
 {
     internal static class TheGodsAreRealDebugSettings
     {
+        private static Vector2 _scrollPos = Vector2.zero;
+
         internal static void DoDebugSettingsWindowContents(Rect inRect)
         {
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
 
+            int buttonCount = 6;
+            int pawnCount = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction.Count();
+            float calculatedHeight = (buttonCount * 35f) + (pawnCount * 30f) + 200f; // 200f for padding/headers
+
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
+
+            Widgets.BeginScrollView(inRect, ref _scrollPos, viewRect);
+
             Listing_Standard listing = new Listing_Standard();
-            listing.Begin(inRect);
+            listing.Begin(viewRect);
             listing.Label("Dev Mode Settings", 24f);
 
             // Add 10 Favor
@@ -117,8 +127,52 @@ namespace TheGodsAreReal.Settings
                     Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
                 }
             }
+            
+            DoDebugDataOverview(listing);
+            DoPawnFavorList(listing);
 
             listing.End();
+            Widgets.EndScrollView();
+        }
+
+        internal static void DoDebugDataOverview(Listing_Standard listing)
+        {
+            WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+            if (favorTracker == null) return;
+
+
+            listing.Label("--- Mod Data Overview ---", 24f);
+            listing.Label($"Tracked Pawns: {favorTracker.pawnFavor.Count}");
+
+            float totalGlobalFavor = 0f;
+            foreach (var val in favorTracker.pawnFavor.Values)
+            {
+                totalGlobalFavor += val;
+            }
+
+            listing.Label($"Total Global Favor: {totalGlobalFavor:F1}");
+            listing.Label($"Average Favor/Pawn: {(favorTracker.pawnFavor.Count > 0 ? (totalGlobalFavor / favorTracker.pawnFavor.Count).ToString("F1") : "N/A")}");
+
+            if (listing.ButtonText("Clear All Data (DANGER)"))
+            {
+                favorTracker.pawnFavor.Clear();
+                Messages.Message("All favor data wiped!", MessageTypeDefOf.CautionInput);
+            }
+        }
+
+        internal static void DoPawnFavorList(Listing_Standard listing)
+        {
+            WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+            if (favorTracker == null) return;
+
+            listing.Label("--- Colony Favor Overview ---", 24f);
+
+            var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
+            foreach (Pawn p in pawns)
+            {
+                float favor = favorTracker.GetFavor(p);
+                listing.Label($"{p.LabelShort}: {favor:F1}");
+            }
         }
     }
 }
