@@ -26,9 +26,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  **/
 
+using RimWorld;
+using RimWorld.Planet;
 using System.Collections.Generic;
 using Verse;
-using RimWorld.Planet;
 
 namespace TheGodsAreReal
 {
@@ -63,6 +64,11 @@ namespace TheGodsAreReal
                 return favor;
             }
             return 0f;
+        }
+
+        public bool PawnWorships(Pawn pawn, PreceptDef godPrecept)
+        {
+            return pawn.Ideo != null && pawn.Ideo.HasPrecept(godPrecept);
         }
 
         // DEBUG METHOD

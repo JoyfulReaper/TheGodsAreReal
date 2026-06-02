@@ -74,8 +74,21 @@ namespace TheGodsAreReal
                 var pawn = Find.Selector.SingleSelectedThing as Pawn;
                 if (pawn != null)
                 {
-                    Find.World.GetComponent<WorldComponent_FavorTracker>().AddFavor(pawn, -10f);
+                    favorTracker.AddFavor(pawn, -10f);
                     Messages.Message($"Removed 10 favor from {pawn.Name}. New Favor level: {favorTracker.GetFavor(pawn)}", MessageTypeDefOf.PositiveEvent);
+                }
+                else
+                {
+                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                }
+            }
+
+            if (listing.ButtonText("Selected Pawn's Favor Level"))
+            {
+                var pawn = Find.Selector.SingleSelectedThing as Pawn;
+                if (pawn != null)
+                {
+                    Messages.Message($"{pawn.Name}: favor level: {favorTracker.GetFavor(pawn)}", MessageTypeDefOf.PositiveEvent);
                 }
                 else
                 {

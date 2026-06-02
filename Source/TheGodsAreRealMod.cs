@@ -26,6 +26,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
  **/
 
+using HarmonyLib;
 using UnityEngine;
 using Verse;
 
@@ -38,6 +39,9 @@ namespace TheGodsAreReal
         public TheGodsAreRealMod(ModContentPack content) : base(content)
         {
             Settings = GetSettings<TheGodsAreRealSettings>();
+            var harmony = new Harmony("com.kylegivler.thegodsarereal");
+            harmony.PatchAll();
+            Log.Message("[TheGodsAreReal]: Harmony patches applied successfully.");
         }
 
         public override string SettingsCategory()

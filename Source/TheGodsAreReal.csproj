@@ -57,13 +57,16 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Defs\GodDef.cs" />
-    <Compile Include="Precepts\PreceptComp_GodFavor.cs" />
+    <Compile Include="Patches\Patch_LordJob_Ritual_ApplyOutcome.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="TheGodsAreRealMod.cs" />
     <Compile Include="Settings\TheGodsAreRealSettings.cs" />
     <Compile Include="Thoughts\ThoughtWorker_GodFavor.cs" />
     <Compile Include="Components\WorldComponent_FavorTracker.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="Defs\" />
+    <Folder Include="Precepts\" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
