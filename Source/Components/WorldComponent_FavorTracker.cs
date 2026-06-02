@@ -29,6 +29,7 @@ using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using System.Linq;
+using UnityEngine;
 using Verse;
 
 namespace TheGodsAreReal
@@ -36,10 +37,83 @@ namespace TheGodsAreReal
     public class WorldComponent_FavorTracker : WorldComponent
     {
         // We use the Pawn's unique ID as the key for performance
-        public Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
+        internal Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
+
+        private const int DecayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
+        private const float PassiveDecayAmount = 0.1f; // How much favor slips away per interval
 
         public WorldComponent_FavorTracker(World world) : base(world) { }
 
+        public override void WorldComponentTick()
+        {
+            base.WorldComponentTick();
+
+            if (Find.TickManager.TicksGame % DecayIntervalTicks == 0)
+            {
+                DecayPassiveFavor();
+            }
+        }
+
+        private void DecayPassiveFavor()
+        {
+            if (pawnFavor.Count == 0)
+                return;
+
+            List<int> pawnIds = new List<int>(pawnFavor.Keys);
+
+            for (int i = 0; i < pawnIds.Count; i++)
+            {
+                int id = pawnIds[i];
+                Pawn pawn = null;
+
+                pawn = Find.CurrentMap?.mapPawns.AllPawns.Find(p => p.thingIDNumber == id);
+
+                if (pawn == null)
+                {
+                    List<Map> maps = Find.Maps;
+                    for (int m = 0; m < maps.Count; m++)
+                    {
+                        pawn = maps[m].mapPawns.AllPawns.Find(p => p.thingIDNumber == id);
+                        if (pawn != null) break;
+                    }
+                }
+
+                if (pawn == null)
+                {
+                    pawn = Find.WorldPawns.AllPawnsAliveOrDead.Find(p => p.thingIDNumber == id);
+                }
+
+                // If the pawn died, was destroyed, or left the map, we can entirely purge them from tracking
+                if (pawn == null || pawn.Destroyed || pawn.Dead)
+                {
+                    pawnFavor.Remove(id);
+                    continue;
+                }
+
+                // Apply decay
+                if (pawnFavor[id] > 0f)
+                {
+                    // Subtract decay, but use Mathf.Max to guarantee it never drops below absolute zero
+                    pawnFavor[id] = Mathf.Max(0f, pawnFavor[id] - PassiveDecayAmount);
+                }
+                else if (pawnFavor[id] < 0f)
+                {
+                    // if negative decay towards zero
+                    pawnFavor[id] = Mathf.Min(0f, pawnFavor[id] + PassiveDecayAmount);
+                }
+            }
+
+            if (Prefs.DevMode && pawnFavor.Count > 0)
+            {
+                Log.Message($"[TheGodsAreReal] Background divine decay processed for {pawnFavor.Count} tracked pawns.");
+            }
+        }
+
+        /// <summary>
+        /// Adds favor to a pawm
+        /// </summary>
+        /// <param name="pawn">The pawn to add favor to</param>
+        /// <param name="amount">The amount of favor to add, can be negative</param>
         public void AddFavor(Pawn pawn, float amount)
         {
             if (pawn == null)
@@ -57,9 +131,14 @@ namespace TheGodsAreReal
             {
                 pawnFavor[id] = 0f;
             }
-            pawnFavor[id] += amount;
+            pawnFavor[id] = Mathf.Clamp(pawnFavor[id] + amount, -100f, 100f);
         }
 
+        /// <summary>
+        /// Get a pawn's favor level
+        /// </summary>
+        /// <param name="pawn">The target pawn</param>
+        /// <returns>The favor level of the targeted pawn</returns>
         public float GetFavor(Pawn pawn)
         {
             if (pawnFavor.TryGetValue(pawn.thingIDNumber, out float favor))
@@ -69,6 +148,11 @@ namespace TheGodsAreReal
             return 0f;
         }
 
+        /// <summary>
+        /// Reset a pawn's favor
+        /// </summary>
+        /// <param name="pawn">The pawn to reset</param>
+        /// <param name="newValue">The amount of favor to assign if not zero</param>
         public void ResetFavor(Pawn pawn, float newValue = 0)
         {
             if (pawn == null)
@@ -90,6 +174,11 @@ namespace TheGodsAreReal
             return pawn.Ideo != null && pawn.Ideo.HasPrecept(godPrecept);
         }
 
+        /// <summary>
+        /// Get the favor score of an Ideology
+        /// </summary>
+        /// <param name="ideo">The ideo to score</param>
+        /// <returns>The favor score of the Ideo (avg of pawn favor for ideo)</returns>
         public float GetIdeoFavor(Ideo ideo)
         {
             if (ideo == null)
@@ -122,14 +211,24 @@ namespace TheGodsAreReal
             if (Scribe.mode == LoadSaveMode.Saving)
             {
                 HashSet<int> activePawnIds = new HashSet<int>();
-                var allWorldPawns = Find.WorldPawns.AllPawnsAliveOrDead;
 
+                List<Map> maps = Find.Maps;
+                for (int m = 0; m < maps.Count; m++)
+                {
+                    var mapPawns = maps[m].mapPawns.AllPawns;
+                    for (int p = 0; p < mapPawns.Count; p++)
+                    {
+                        if (mapPawns[p] != null)
+                            activePawnIds.Add(mapPawns[p].thingIDNumber);
+                    }
+                }
+
+                var allWorldPawns = Find.WorldPawns.AllPawnsAliveOrDead;
                 for (int i = 0; i < allWorldPawns.Count; i++)
                 {
                     if (allWorldPawns[i] != null)
                     {
                         activePawnIds.Add(allWorldPawns[i].thingIDNumber);
-
                     }
                 }
 
@@ -156,24 +255,6 @@ namespace TheGodsAreReal
             }
 
             Scribe_Collections.Look(ref pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
-        }
-
-        // // // DEBUG // // //
-
-        // DEBUG METHOD
-        public void DebugAddFavor(Pawn pawn, float amount)
-        {
-            AddFavor(pawn, amount);
-            float newFavor = GetFavor(pawn);
-            Log.Message($"[TheGodsAreReal] Debug: Added {amount} favor to {pawn.Name}. New total: {newFavor}");
-        }
-
-        // DEBUG METHOD
-        public void DebugRemoveFavor(Pawn pawn, float amount)
-        {
-            AddFavor(pawn, -amount);
-            float newFavor = GetFavor(pawn);
-            Log.Message($"[TheGodsAreReal] Debug: Added {amount} favor to {pawn.Name}. New total: {newFavor}");
         }
     }
 }
