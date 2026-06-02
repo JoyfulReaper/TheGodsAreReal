@@ -58,6 +58,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Patches\JobDriver_MeditatePatches.cs" />
+    <Compile Include="Patches\MemoryThoughHandlerPatches.cs" />
     <Compile Include="Patches\PawnIdeoTrackerPatches.cs" />
     <Compile Include="Patches\RitualOutcomeEffectWorker_FromQualityPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
