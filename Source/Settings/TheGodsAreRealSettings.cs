@@ -28,6 +28,8 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using RimWorld;
 using UnityEngine;
 using Verse;
+using Verse.AI;
+using System.Linq;
 
 namespace TheGodsAreReal
 {
@@ -88,6 +90,32 @@ namespace TheGodsAreReal
                 if (pawn != null)
                 {
                     Messages.Message($"{pawn.Name}: favor level: {favorTracker.GetFavor(pawn)}", MessageTypeDefOf.PositiveEvent);
+                }
+                else
+                {
+                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                }
+            }
+
+            if (listing.ButtonText("Force Selected Pawn to pray"))
+            {
+                var pawn = Find.Selector.SingleSelectedThing as Pawn;
+
+                if (pawn != null)
+                {
+                    var target = pawn?.Map?.listerBuildings.AllBuildingsColonistOfDef(ThingDefOf.SteleLarge).FirstOrDefault();
+                    
+                    if(target != null)
+                    {
+                        Job job = JobMaker.MakeJob(JobDefOf.MeditatePray, target);
+                        pawn.jobs.StopAll();
+                        pawn.jobs.StartJob(job, JobCondition.InterruptForced);
+                        Messages.Message($"Forced {pawn.Name} to pray", MessageTypeDefOf.PositiveEvent);
+                    }
+                    else
+                    {
+                        Messages.Message("Build a Large Stele first!", MessageTypeDefOf.RejectInput);
+                    }
                 }
                 else
                 {
