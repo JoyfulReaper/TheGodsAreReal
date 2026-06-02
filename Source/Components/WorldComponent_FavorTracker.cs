@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
+using System.Linq;
 using Verse;
 
 namespace TheGodsAreReal
@@ -35,14 +36,13 @@ namespace TheGodsAreReal
     public class WorldComponent_FavorTracker : WorldComponent
     {
         // We use the Pawn's unique ID as the key for performance
-        private Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
+        public Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
 
         public WorldComponent_FavorTracker(World world) : base(world) { }
 
         public override void ExposeData()
         {
             base.ExposeData();
-            // This ensures your data persists across saves
             Scribe_Collections.Look(ref pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
         }
 
@@ -69,6 +69,28 @@ namespace TheGodsAreReal
         {
             return pawn.Ideo != null && pawn.Ideo.HasPrecept(godPrecept);
         }
+
+        public float GetIdeoFavor(Ideo ideo)
+        {
+            float totalFavor = 0f;
+            int pawnCount = 0;
+            var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
+
+            foreach (var kvp in pawnFavor)
+            {
+                Pawn p = pawns.FirstOrDefault(x => x.thingIDNumber == kvp.Key);
+                if (p != null && p.Faction == Faction.OfPlayer && p.Ideo == ideo)
+                {
+                    totalFavor += kvp.Value;
+                    pawnCount++;
+                }
+            }
+            return pawnCount > 0 ? totalFavor / pawnCount : 0f;
+        }
+
+
+
+        // // // DEBUG // // //
 
         // DEBUG METHOD
         public void DebugAddFavor(Pawn pawn, float amount)

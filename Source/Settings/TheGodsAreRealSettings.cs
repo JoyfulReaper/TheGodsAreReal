@@ -95,6 +95,19 @@ namespace TheGodsAreReal
                 }
             }
 
+            if (listing.ButtonText("Ideology Favor Level for selected pawns Ideo"))
+            {
+                var pawn = Find.Selector.SingleSelectedThing as Pawn;
+                if (pawn != null)
+                {
+                    Messages.Message($"Ideology {pawn.Ideo.name} favor level: {favorTracker.GetIdeoFavor(pawn.Ideo)}", MessageTypeDefOf.PositiveEvent);
+                }
+                else
+                {
+                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                }
+            }
+
             listing.End();
         }
     }

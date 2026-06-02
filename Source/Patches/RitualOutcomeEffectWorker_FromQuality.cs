@@ -42,14 +42,13 @@ namespace TheGodsAreReal.Patches
                 Log.Message($"[TheGodsAreReal: RitualOutcomeEffectWorker_FromQuality]: Postfix Fired.");
             }
 
-            // 1. Calculate quality again
+            //Calculate quality again
             float quality = Traverse.Create(__instance).Method("GetQuality", jobRitual, progress).GetValue<float>();
-
-            // 2. Execute your custom favor logic based on 'outcome' and 'quality'
             Log.Message($"[TheGodsAreReal] Ritual ended with quality: {quality}");
 
-
             var tracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+
+            // TODO: Calculate amount of favor to add/remove based on ritual quality
             float favorChange = 5f;
 
             if (totalPresence != null)
