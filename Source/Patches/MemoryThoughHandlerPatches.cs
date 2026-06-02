@@ -36,16 +36,22 @@ namespace TheGodsAreReal.Patches
     {
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
-            Pawn pawn = __instance.pawn;
-            if (pawn == null)
+            if (newThought == null || __instance?.pawn == null)
                 return;
 
-            if(newThought.sourcePrecept != null)
+            if (__instance.pawn.Dead || !__instance.pawn.Spawned)
+                return;
+
+            if (__instance.pawn.Ideo?.KeyDeityName == null)
+                return;
+
+            if (newThought.sourcePrecept != null)
             {
                 var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
                 if (tracker == null)
                     return;
 
+                Pawn pawn = __instance.pawn;
                 float moodOffset = newThought.MoodOffset();
 
                 if (moodOffset < 0f)
