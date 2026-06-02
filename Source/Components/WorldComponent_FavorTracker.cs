@@ -41,6 +41,7 @@ namespace TheGodsAreReal
 
         private const int DecayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
         private const float PassiveDecayAmount = 0.1f; // How much favor slips away per interval
+        private static readonly HediffDef DivineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
 
         public WorldComponent_FavorTracker(World world) : base(world) { }
 
@@ -48,9 +49,63 @@ namespace TheGodsAreReal
         {
             base.WorldComponentTick();
 
+            // Decay Favor
             if (Find.TickManager.TicksGame % DecayIntervalTicks == 0)
             {
                 DecayPassiveFavor();
+            }
+
+
+            // Rare Tick
+            if (Find.TickManager.TicksGame % 250 != 0)
+                return;
+
+            // Grab all maps currently loaded in the game
+            List<Map> maps = Find.Maps;
+            for (int m = 0; m < maps.Count; m++)
+            {
+                // Grab all free colonists on the current map
+                List<Pawn> freeColonists = maps[m].mapPawns.FreeColonists;
+                for (int p = 0; p < freeColonists.Count; p++)
+                {
+                    Pawn pawn = freeColonists[p];
+
+                    if (pawn == null || !pawn.Spawned || pawn.Dead)
+                        continue;
+
+                    if (pawn.Ideo?.KeyDeityName == null)
+                        continue;
+
+                    UpdatePawnDivineHediff(pawn);
+                }
+            }
+        }
+
+        private void UpdatePawnDivineHediff(Pawn pawn)
+        {
+            float favor = this.GetFavor(pawn);
+
+            // Map the favor score (-100.0 to 100.0) to a C# normalized float scale (0.0 to 1.0)
+            // -100 favor becomes 0.0 severity (Pure Wrath)
+            //    0 favor becomes 0.5 severity (Neutral / Hidden)
+            // +100 favor becomes 1.0 severity (Pure Grace)
+            float normalizedSeverity = (favor + 100f) / 200f;
+            normalizedSeverity = UnityEngine.Mathf.Clamp01(normalizedSeverity);
+
+            // 3. Look for an existing instance of our tracking Hediff on the pawn
+            Hediff existingHediff = pawn.health?.hediffSet?.GetFirstHediffOfDef(DivineTouchDef);
+
+            if (existingHediff != null)
+            {
+                // Update the severity level dynamically as their behavior changes
+                existingHediff.Severity = normalizedSeverity;
+            }
+            else
+            {
+                // If they don't have the hediff yet, create it and inject it into their health tracker
+                Hediff newHediff = HediffMaker.MakeHediff(DivineTouchDef, pawn);
+                newHediff.Severity = normalizedSeverity;
+                pawn.health?.AddHediff(newHediff);
             }
         }
 

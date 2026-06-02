@@ -17,33 +17,46 @@ namespace TheGodsAreReal.Settings
             listing.Label("Dev Mode Settings", 24f);
 
             // Add 10 Favor
-            if (listing.ButtonText("Add 10 Favor to Selected Pawn"))
+            if (listing.ButtonText("Add 10 Favor to Selected Pawns"))
             {
-                var pawn = Find.Selector.SingleSelectedThing as Pawn;
-                if (pawn != null)
+                var selectedPawns = Find.Selector.SelectedPawns;
+                if (selectedPawns.NullOrEmpty())
                 {
-                    favorTracker.AddFavor(pawn, 10f);
-                    Messages.Message($"Added 10 favor to {pawn.Name}. New Favor level: {favorTracker.GetFavor(pawn)}", MessageTypeDefOf.PositiveEvent);
+                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
                 }
                 else
                 {
-                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                    for (int i = 0; i < selectedPawns.Count; i++)
+                    {
+                        Pawn selectedPawn = selectedPawns[i];
+                        if (selectedPawn != null)
+                        {
+                            favorTracker.AddFavor(selectedPawn, 10f);
+                            Messages.Message($"Added 10 favor to {selectedPawn.LabelShort}. New Favor level: {favorTracker.GetFavor(selectedPawn)}", MessageTypeDefOf.PositiveEvent);
+                        }
+                    }
                 }
             }
 
-
-            // Remove 10 favor
-            if (listing.ButtonText("Remove 10 Favor from Selected Pawn"))
+            // Remove 10 Favor
+            if (listing.ButtonText("Remove 10 Favor from Selected Pawns"))
             {
-                var pawn = Find.Selector.SingleSelectedThing as Pawn;
-                if (pawn != null)
+                var selectedPawns = Find.Selector.SelectedPawns;
+                if (selectedPawns.NullOrEmpty())
                 {
-                    favorTracker.AddFavor(pawn, -10f);
-                    Messages.Message($"Removed 10 favor from {pawn.Name}. New Favor level: {favorTracker.GetFavor(pawn)}", MessageTypeDefOf.PositiveEvent);
+                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
                 }
                 else
                 {
-                    Messages.Message("Select a pawn first!", MessageTypeDefOf.RejectInput);
+                    for (int i = 0; i < selectedPawns.Count; i++)
+                    {
+                        Pawn selectedPawn = selectedPawns[i];
+                        if (selectedPawn != null)
+                        {
+                            favorTracker.AddFavor(selectedPawn, -10f);
+                            Messages.Message($"Removed 10 favor from {selectedPawn.LabelShort}. New Favor level: {favorTracker.GetFavor(selectedPawn)}", MessageTypeDefOf.PositiveEvent);
+                        }
+                    }
                 }
             }
 

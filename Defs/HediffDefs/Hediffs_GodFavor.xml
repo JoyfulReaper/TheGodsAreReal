@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<Defs>
+  <HediffDef>
+    <defName>TheGodsAreReal_DivineTouch</defName>
+    <label>Divine Alignment</label>
+    <description>An intangible, ambient metaphysical resonance affecting this individual's physical and mental capacity.</description>
+    <hediffClass>HediffWithComps</hediffClass>
+    <initialSeverity>0.5</initialSeverity> <!-- 0.5 will be our "Neutral / Inactive" baseline -->
+    <isBad>false</isBad>
+    <stages>
+      <!-- Stage 0: Divine Wrath (Severity 0.0 to 0.2) -->
+      <li>
+        <minSeverity>0.0</minSeverity>
+        <label>Divine Wrath</label>
+        <capMods>
+          <li>
+            <capacity>Manipulation</capacity>
+            <offset>-0.15</offset> <!-- Clumsy fingers, dropping tools -->
+          </li>
+        </capMods>
+        <statOffsets>
+          <ImmunityGainSpeed>-0.10</ImmunityGainSpeed>
+          <WorkSpeedGlobal>-0.10</WorkSpeedGlobal>
+        </statOffsets>
+      </li>
+
+      <!-- Stage 1: Neutral / Hidden (Severity 0.21 to 0.79) -->
+      <li>
+        <minSeverity>0.21</minSeverity>
+        <label>unmarked</label>
+        <becomeVisible>false</becomeVisible> <!-- Completely hidden from the health tab while average! -->
+      </li>
+
+      <!-- Stage 2: Divine Grace (Severity 0.80 to 1.0) -->
+      <li>
+        <minSeverity>0.80</minSeverity>
+        <label>Divine Grace</label>
+        <capMods>
+          <li>
+            <capacity>Moving</capacity>
+            <offset>0.10</offset>
+          </li>
+        </capMods>
+        <statOffsets>
+          <WorkSpeedGlobal>0.15</WorkSpeedGlobal>
+          <PsychicSensitivity>0.20</PsychicSensitivity>
+        </statOffsets>
+      </li>
+    </stages>
+  </HediffDef>
+</Defs>
