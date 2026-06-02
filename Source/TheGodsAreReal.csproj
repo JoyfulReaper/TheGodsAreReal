@@ -60,6 +60,7 @@
     <Compile Include="Patches\JobDriver_MeditatePatches.cs" />
     <Compile Include="Patches\RitualOutcomeEffectWorker_FromQualityPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Settings\TheGodsAreRealDebugSettings.cs" />
     <Compile Include="TheGodsAreRealMod.cs" />
     <Compile Include="Settings\TheGodsAreRealSettings.cs" />
     <Compile Include="Thoughts\ThoughtWorker_GodFavor.cs" />
