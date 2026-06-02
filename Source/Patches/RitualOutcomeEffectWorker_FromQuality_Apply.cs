@@ -51,7 +51,7 @@ namespace TheGodsAreReal.Patches
                 Log.Message($"[TheGodsAreReal] Ritual ended with quality: {quality:F2}");
             }
 
-            var tracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
             if (tracker == null)
                 return;
 
@@ -88,19 +88,25 @@ namespace TheGodsAreReal.Patches
 
                     float individualFavorChange = baseFavorChange;
 
-                    // Give the organizer 50% extra impact for the outcome
+                    // Give the organizer 25% extra impact for the outcome
                     if (participant == organizer)
                     {
-                        individualFavorChange *= 1.5f;
+                        individualFavorChange *= 1.25f;
                     }
 
                     if (participant.Ideo == ritualIdeo)
                     {
+                        var currentFavor = tracker.GetFavor(participant);
+                        if (currentFavor > 60f)
+                        {
+                            individualFavorChange *= 0.5f;
+                        }
+
                         tracker.AddFavor(participant, individualFavorChange);
                     }
                     else
                     {
-                        individualFavorChange = -1f;
+                        individualFavorChange = -3f;
                         tracker.AddFavor(participant, individualFavorChange);
                     }
 

@@ -38,19 +38,19 @@ namespace TheGodsAreReal.Patches
     {
         public static void Prefix(Pawn_IdeoTracker __instance, Ideo ideo, Pawn ___pawn)
         {
-            if (___pawn == null)
+            if (___pawn == null || __instance.Ideo == ideo)
                 return;
 
             if(__instance.Ideo != ideo)
             {
-                var favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+                var favorTracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
                 if (favorTracker != null)
                 {
                     favorTracker.ResetFavor(___pawn);
 
                     if(Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal]: {___pawn.Name} changed Ideo, resetting favor.");
+                        Log.Message($"[TheGodsAreReal]: {___pawn.LabelShort} changed Ideo, resetting favor.");
                     }
                 }
             }

@@ -37,7 +37,7 @@ namespace TheGodsAreReal
             if (p.Ideo == null || p.Ideo.KeyDeityName == null)
                 return ThoughtState.Inactive;
 
-            var tracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
             if (tracker == null)
                 return ThoughtState.Inactive;
 

@@ -30,8 +30,6 @@ using RimWorld;
 using TheGodsAreReal;
 using Verse;
 
-// TODO: Balance favor
-
 [HarmonyPatch(typeof(RimWorld.JobDriver_Meditate), "MeditationTick")]
 public static class JobDriver_Meditate_MeditationTick
 {
@@ -44,7 +42,7 @@ public static class JobDriver_Meditate_MeditationTick
 
             if(Find.TickManager.TicksGame % 250 == 0)
             {
-                var favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
+                var favorTracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
                 if (favorTracker != null)
                 {
                     float favorGained = 0.5f;

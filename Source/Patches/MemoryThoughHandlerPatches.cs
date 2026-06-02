@@ -29,8 +29,6 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-// TODO: Balance favor
-
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(MemoryThoughtHandler), nameof(MemoryThoughtHandler.TryGainMemory), new System.Type[] { typeof(Thought_Memory), typeof(Pawn) })]
@@ -44,19 +42,27 @@ namespace TheGodsAreReal.Patches
 
             if(newThought.sourcePrecept != null)
             {
-                var tracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
-                if (tracker != null)
+                var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
+                if (tracker == null)
                     return;
 
                 float moodOffset = newThought.MoodOffset();
 
-                if(moodOffset < 0f)
+                if (moodOffset < 0f)
                 {
-                    tracker.AddFavor(pawn, -2f);
+                    tracker.AddFavor(pawn, moodOffset * 0.5f);
+                    if (Prefs.DevMode)
+                    {
+                        Log.Message($"[TheGodsAreReal]: A thought caused {pawn.LabelShort}'s favor to change by: {moodOffset * 0.5f}");
+                    }
                 }
                 else if (moodOffset > 0f)
                 {
-                    tracker.AddFavor(pawn, 1f);
+                    tracker.AddFavor(pawn, moodOffset * 0.25f);
+                    if (Prefs.DevMode)
+                    {
+                        Log.Message($"[TheGodsAreReal]: A thought caused {pawn.LabelShort}'s favor to change by: {moodOffset * 0.25f}");
+                    }
                 }
             }
         }
