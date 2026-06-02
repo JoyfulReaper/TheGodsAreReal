@@ -40,7 +40,8 @@ namespace TheGodsAreReal
             Settings = GetSettings<TheGodsAreRealSettings>();
             var harmony = new Harmony("com.kylegivler.thegodsarereal");
             harmony.PatchAll();
-            Log.Message("[TheGodsAreReal]: Harmony patches applied successfully.");
+
+            Log.Message($"[TheGodsAreReal {Settings.Version}]: Harmony patches applied successfully.");
         }
 
         public override string SettingsCategory()
