@@ -30,6 +30,8 @@ using RimWorld;
 using System.Collections.Generic;
 using Verse;
 
+// TODO: Balance favor
+
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(RitualOutcomeEffectWorker_FromQuality), nameof(RitualOutcomeEffectWorker_FromQuality.Apply))]
@@ -37,6 +39,9 @@ namespace TheGodsAreReal.Patches
     {
         public static void Postfix(RitualOutcomeEffectWorker_FromQuality __instance, float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
         {
+            if (jobRitual == null)
+                return;
+
             //Calculate quality again
             float quality = Traverse.Create(__instance).Method("GetQuality", jobRitual, progress).GetValue<float>();
 

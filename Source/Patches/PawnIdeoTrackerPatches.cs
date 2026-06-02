@@ -29,6 +29,8 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
+// TODO: Balance favor
+
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(Pawn_IdeoTracker), nameof(Pawn_IdeoTracker.SetIdeo))]

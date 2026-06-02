@@ -29,7 +29,8 @@ using HarmonyLib;
 using RimWorld;
 using TheGodsAreReal;
 using Verse;
-using Verse.AI;
+
+// TODO: Balance favor
 
 [HarmonyPatch(typeof(RimWorld.JobDriver_Meditate), "MeditationTick")]
 public static class JobDriver_MeditatePatches
