@@ -72,19 +72,26 @@ namespace TheGodsAreReal
 
         public float GetIdeoFavor(Ideo ideo)
         {
+            if (ideo == null)
+                return 0f;
+
             float totalFavor = 0f;
             int pawnCount = 0;
             var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
 
-            foreach (var kvp in pawnFavor)
+            for (int i = 0; i < pawns.Count; i++)
             {
-                Pawn p = pawns.FirstOrDefault(x => x.thingIDNumber == kvp.Key);
-                if (p != null && p.Faction == Faction.OfPlayer && p.Ideo == ideo)
+                Pawn p = pawns[i];
+                if (p.Ideo == ideo)
                 {
-                    totalFavor += kvp.Value;
-                    pawnCount++;
+                    if (pawnFavor.TryGetValue(p.thingIDNumber, out float favor))
+                    {
+                        totalFavor += favor;
+                        pawnCount++;
+                    }
                 }
             }
+
             return pawnCount > 0 ? totalFavor / pawnCount : 0f;
         }
 
