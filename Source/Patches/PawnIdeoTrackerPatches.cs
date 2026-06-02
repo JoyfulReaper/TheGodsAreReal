@@ -18,6 +18,11 @@ namespace TheGodsAreReal.Patches
                 if (favorTracker != null)
                 {
                     favorTracker.ResetFavor(___pawn);
+
+                    if(Prefs.DevMode)
+                    {
+                        Log.Message($"[TheGodsAreReal]: {___pawn.Name} changed Ideo, resetting favor.");
+                    }
                 }
             }
         }
