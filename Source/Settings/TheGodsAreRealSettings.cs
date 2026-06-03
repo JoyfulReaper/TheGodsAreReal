@@ -36,9 +36,10 @@ namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
-        private string _version = "0.0.4";
+        private string _version = "0.0.5";
         private static Vector2 _scrollPos = Vector2.zero;
         private static int buttonCount = 0;
+        internal bool AlwaysShowMotes = false;
 
         public string Version
         {
@@ -50,7 +51,7 @@ namespace TheGodsAreReal
 
         public void DoSettingsWindowContents(Rect inRect)
         {
-            int totalButtonCount = Prefs.DevMode ? TheGodsAreRealDebugSettings.debugButtonCount : buttonCount;
+            int totalButtonCount = Prefs.DevMode ? TheGodsAreRealDebugSettings.debugButtonCount + buttonCount: buttonCount;
             var trackedPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
                            .Where(p => p.RaceProps.Humanlike).ToList();
 
@@ -69,6 +70,9 @@ namespace TheGodsAreReal
             if (Prefs.DevMode)
                 TheGodsAreRealDebugSettings.DoDebugSettingsWindowContents(listing, trackedPawns);
 
+            listing.Label("General Settings", 24f);
+            listing.CheckboxLabeled("Always show motes (May decrease performance)", ref AlwaysShowMotes);
+
             listing.End();
             Widgets.EndScrollView();
         }
@@ -77,6 +81,7 @@ namespace TheGodsAreReal
         {
             base.ExposeData();
             Scribe_Values.Look(ref _version, "Version", _version);
+            Scribe_Values.Look(ref AlwaysShowMotes, "AlwaysShowMotes", false);
         }
     }
 }

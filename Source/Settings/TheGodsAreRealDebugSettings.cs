@@ -129,20 +129,20 @@ namespace TheGodsAreReal.Settings
 
 
             listing.Label("--- Mod Data Overview ---", 24f);
-            listing.Label($"Tracked Pawns: {favorTracker.pawnFavor.Count}");
+            listing.Label($"Tracked Pawns: {favorTracker.PawnFavor.Count}");
 
             float totalGlobalFavor = 0f;
-            foreach (var val in favorTracker.pawnFavor.Values)
+            foreach (var val in favorTracker.PawnFavor.Values)
             {
                 totalGlobalFavor += val;
             }
 
             listing.Label($"Total Global Favor: {totalGlobalFavor:F1}");
-            listing.Label($"Average Favor/Pawn: {(favorTracker.pawnFavor.Count > 0 ? (totalGlobalFavor / favorTracker.pawnFavor.Count).ToString("F1") : "N/A")}");
+            listing.Label($"Average Favor/Pawn: {(favorTracker.PawnFavor.Count > 0 ? (totalGlobalFavor / favorTracker.PawnFavor.Count).ToString("F1") : "N/A")}");
 
             if (listing.ButtonText("Clear All Data (DANGER)"))
             {
-                favorTracker.pawnFavor.Clear();
+                favorTracker.ClearAllPawnFavor();
                 Messages.Message("All favor data wiped!", MessageTypeDefOf.CautionInput);
             }
         }

@@ -36,13 +36,17 @@ namespace TheGodsAreReal
     public class WorldComponent_FavorTracker : WorldComponent
     {
         // We use the Pawn's unique ID as the key for performance
-        internal Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
-        internal bool SuppressMotes = false;
+        private Dictionary<int, float> _pawnFavor = new Dictionary<int, float>();
+        private bool _suppressAllMotes = false; // Not currently used
 
-        private const int DecayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
-        private const float PassiveDecayAmount = 0.05f; // How much favor slips away per interval
-        private static readonly HediffDef DivineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
+        // Favor decay
+        private const int _decayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
+        private const float _passiveDecayAmount = 0.05f; // How much favor slips away per interval
+        private static readonly HediffDef _divineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
         private Dictionary<int, int> _lastFavorTick = new Dictionary<int, int>();
+        private TheGodsAreRealSettings Settings => LoadedModManager.GetMod<TheGodsAreRealMod>().GetSettings<TheGodsAreRealSettings>();
+
+        public IReadOnlyDictionary<int, float> PawnFavor => _pawnFavor;
 
         public WorldComponent_FavorTracker(World world) : base(world) { }
 
@@ -51,7 +55,7 @@ namespace TheGodsAreReal
             base.WorldComponentTick();
 
             // Decay Favor
-            if (Find.TickManager.TicksGame % DecayIntervalTicks == 0)
+            if (Find.TickManager.TicksGame % _decayIntervalTicks == 0)
             {
                 DecayPassiveFavor();
             }
@@ -94,7 +98,7 @@ namespace TheGodsAreReal
             normalizedSeverity = UnityEngine.Mathf.Clamp01(normalizedSeverity);
 
             // 3. Look for an existing instance of our tracking Hediff on the pawn
-            Hediff existingHediff = pawn.health?.hediffSet?.GetFirstHediffOfDef(DivineTouchDef);
+            Hediff existingHediff = pawn.health?.hediffSet?.GetFirstHediffOfDef(_divineTouchDef);
 
             if (existingHediff != null)
             {
@@ -104,7 +108,7 @@ namespace TheGodsAreReal
             else
             {
                 // If they don't have the hediff yet, create it and inject it into their health tracker
-                Hediff newHediff = HediffMaker.MakeHediff(DivineTouchDef, pawn);
+                Hediff newHediff = HediffMaker.MakeHediff(_divineTouchDef, pawn);
                 newHediff.Severity = normalizedSeverity;
                 pawn.health?.AddHediff(newHediff);
             }
@@ -112,58 +116,59 @@ namespace TheGodsAreReal
 
         private void DecayPassiveFavor()
         {
-            if (pawnFavor.Count == 0)
-                return;
+            if (_pawnFavor.Count == 0) return;
 
-            List<int> pawnIds = new List<int>(pawnFavor.Keys);
+            Dictionary<int, Pawn> pawnCache = new Dictionary<int, Pawn>();
 
-            for (int i = 0; i < pawnIds.Count; i++)
+            // Add all map pawns
+            var maps = Find.Maps;
+            for (int m = 0; m < maps.Count; m++)
             {
-                int id = pawnIds[i];
-                Pawn pawn = null;
-
-                pawn = Find.CurrentMap?.mapPawns.AllPawns.Find(p => p.thingIDNumber == id);
-
-                if (pawn == null)
+                var mapPawns = maps[m].mapPawns.AllPawns;
+                for (int p = 0; p < mapPawns.Count; p++)
                 {
-                    List<Map> maps = Find.Maps;
-                    for (int m = 0; m < maps.Count; m++)
-                    {
-                        pawn = maps[m].mapPawns.AllPawns.Find(p => p.thingIDNumber == id);
-                        if (pawn != null) break;
-                    }
+                    pawnCache[mapPawns[p].thingIDNumber] = mapPawns[p];
                 }
+            }
 
-                if (pawn == null)
-                {
-                    pawn = Find.WorldPawns.AllPawnsAliveOrDead.Find(p => p.thingIDNumber == id);
-                }
+            // Add all world pawns
+            var worldPawns = Find.WorldPawns.AllPawnsAliveOrDead;
+            for (int i = 0; i < worldPawns.Count; i++)
+            {
+                pawnCache[worldPawns[i].thingIDNumber] = worldPawns[i];
+            }
 
-                // If the pawn died, was destroyed, or left the map, we can entirely purge them from tracking
+            List<int> idsToPurge = new List<int>();
+
+            foreach (var kvp in _pawnFavor)
+            {
+                int id = kvp.Key;
+
+                // O(1) lookup in our pre-built cache
+                pawnCache.TryGetValue(id, out Pawn pawn);
+
                 if (pawn == null || pawn.Destroyed || pawn.Dead)
                 {
-                    pawnFavor.Remove(id);
+                    idsToPurge.Add(id);
                     continue;
                 }
 
                 // Apply decay
-                if (pawnFavor[id] > 0f)
-                {
-                    // Subtract decay, but use Mathf.Max to guarantee it never drops below absolute zero
-                    pawnFavor[id] = Mathf.Max(0f, pawnFavor[id] - PassiveDecayAmount);
-                }
-                else if (pawnFavor[id] < 0f)
-                {
-                    // if negative decay towards zero
-                    pawnFavor[id] = Mathf.Min(0f, pawnFavor[id] + PassiveDecayAmount);
-                }
+                float favor = kvp.Value;
+                if (favor > 0f)
+                    _pawnFavor[id] = Mathf.Max(0f, favor - _passiveDecayAmount);
+                else if (favor < 0f)
+                    _pawnFavor[id] = Mathf.Min(0f, favor + _passiveDecayAmount);
             }
 
-            if (Prefs.DevMode && pawnFavor.Count > 0)
+            // Cleanup
+            for (int i = 0; i < idsToPurge.Count; i++)
             {
-                Log.Message($"[TheGodsAreReal] Background divine decay processed for {pawnFavor.Count} tracked pawns.");
+                _pawnFavor.Remove(idsToPurge[i]);
+                _lastFavorTick.Remove(idsToPurge[i]);
             }
         }
+
 
         /// <summary>
         /// Adds favor to a pawm
@@ -191,13 +196,13 @@ namespace TheGodsAreReal
                 return;
 
             int id = pawn.thingIDNumber;
-            if (!pawnFavor.ContainsKey(id))
+            if (!_pawnFavor.ContainsKey(id))
             {
-                pawnFavor[id] = 0f;
+                _pawnFavor[id] = 0f;
             }
-            pawnFavor[id] = Mathf.Clamp(pawnFavor[id] + amount, -100f, 100f);
+            _pawnFavor[id] = Mathf.Clamp(_pawnFavor[id] + amount, -100f, 100f);
 
-            if (Mathf.Abs(amount) >= 0.5f && showMote && !SuppressMotes)
+            if ( (Mathf.Abs(amount) >= 0.5f && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes)
             {
                 Color favorColor = (amount >= 0) ? Color.cyan : Color.red;
                 string text = (amount > 0) ? $"+{amount} Favor" : $"{amount} Favor";
@@ -214,7 +219,7 @@ namespace TheGodsAreReal
         /// <returns>The favor level of the targeted pawn</returns>
         public float GetFavor(Pawn pawn)
         {
-            if (pawnFavor.TryGetValue(pawn.thingIDNumber, out float favor))
+            if (_pawnFavor.TryGetValue(pawn.thingIDNumber, out float favor))
             {
                 return favor;
             }
@@ -231,9 +236,9 @@ namespace TheGodsAreReal
             if (pawn == null)
                 return;
 
-            if(pawnFavor.ContainsKey(pawn.thingIDNumber))
+            if(_pawnFavor.ContainsKey(pawn.thingIDNumber))
             {
-                pawnFavor[pawn.thingIDNumber] = newValue;
+                _pawnFavor[pawn.thingIDNumber] = newValue;
             }
 
             if(Prefs.DevMode)
@@ -272,7 +277,7 @@ namespace TheGodsAreReal
                 if (p.Ideo == ideo && p.RaceProps.Humanlike)
                 {
                     pawnCount++;
-                    if (pawnFavor.TryGetValue(p.thingIDNumber, out float favor))
+                    if (_pawnFavor.TryGetValue(p.thingIDNumber, out float favor))
                     {
                         totalFavor += favor;
                     }
@@ -284,12 +289,21 @@ namespace TheGodsAreReal
 
         public bool ShouldSuppressThoughtMote(Thought_Memory thought)
         {
+            // TODO: I don't think we should show motes here ever, so ignore any settings to turn them on
+
             // Define what constitutes "Mass Event" thoughts that should silence motes
             if (thought.def.defName.Contains("Party") || thought.def.defName.Contains("Ritual"))
             {
                 return true;
             }
+
             return false;
+        }
+
+        public void ClearAllPawnFavor()
+        {
+            _pawnFavor.Clear();
+            Log.Warning("!!![TheGodsAreReal] All favor data DELETED!!!");
         }
 
         public override void ExposeData()
@@ -297,9 +311,9 @@ namespace TheGodsAreReal
             base.ExposeData();
 
             // Loading
-            if (Scribe.mode == LoadSaveMode.LoadingVars && pawnFavor == null)
+            if (Scribe.mode == LoadSaveMode.LoadingVars && _pawnFavor == null)
             {
-                pawnFavor = new Dictionary<int, float>();
+                _pawnFavor = new Dictionary<int, float>();
             }
 
             // Saving
@@ -330,7 +344,7 @@ namespace TheGodsAreReal
 
                 // Create a list of keys to remove so we don't mutate the dictionary during iteration
                 List<int> keysToRemove = new List<int>();
-                foreach (var key in pawnFavor.Keys)
+                foreach (var key in _pawnFavor.Keys)
                 {
                     if (!activePawnIds.Contains(key))
                     {
@@ -341,7 +355,7 @@ namespace TheGodsAreReal
                 // Purge Ghost Entries
                 for (int i = 0; i < keysToRemove.Count; i++)
                 {
-                    pawnFavor.Remove(keysToRemove[i]);
+                    _pawnFavor.Remove(keysToRemove[i]);
                 }
 
                 if (keysToRemove.Count > 0 && Prefs.DevMode)
@@ -350,7 +364,8 @@ namespace TheGodsAreReal
                 }
             }
 
-            Scribe_Collections.Look(ref pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref _pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref _lastFavorTick, "lastFavorTick", LookMode.Value, LookMode.Value);
         }
     }
 }
