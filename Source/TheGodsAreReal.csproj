@@ -56,6 +56,7 @@
     <Compile Include="Patches\JobDriver_Meditate_MeditationTick.cs" />
     <Compile Include="Patches\MemoryThoughHandlerPatches.cs" />
     <Compile Include="Patches\PawnIdeoTrackerPatches.cs" />
+    <Compile Include="Patches\QuestPatches.cs" />
     <Compile Include="Patches\RitualOutcomeEffectWorker_FromQuality_Apply.cs" />
     <Compile Include="Patches\PawnPatches.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

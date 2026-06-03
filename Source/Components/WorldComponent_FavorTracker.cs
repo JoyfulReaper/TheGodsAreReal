@@ -73,7 +73,7 @@ namespace TheGodsAreReal
                     if (pawn == null || !pawn.Spawned || pawn.Dead)
                         continue;
 
-                    if (pawn.Ideo?.KeyDeityName == null)
+                    if (pawn.Ideo?.KeyDeityName == null || !pawn.RaceProps.Humanlike)
                         continue;
 
                     UpdatePawnDivineHediff(pawn);
