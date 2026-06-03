@@ -37,6 +37,7 @@ namespace TheGodsAreReal
     {
         // We use the Pawn's unique ID as the key for performance
         internal Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
+        internal bool SuppressMotes = false;
 
         private const int DecayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
         private const float PassiveDecayAmount = 0.05f; // How much favor slips away per interval
@@ -196,7 +197,7 @@ namespace TheGodsAreReal
             }
             pawnFavor[id] = Mathf.Clamp(pawnFavor[id] + amount, -100f, 100f);
 
-            if (Mathf.Abs(amount) >= 0.5f && showMote)
+            if (Mathf.Abs(amount) >= 0.5f && showMote && !SuppressMotes)
             {
                 Color favorColor = (amount >= 0) ? Color.cyan : Color.red;
                 string text = (amount > 0) ? $"+{amount} Favor" : $"{amount} Favor";
@@ -279,6 +280,16 @@ namespace TheGodsAreReal
             }
 
             return pawnCount > 0 ? totalFavor / pawnCount : 0f;
+        }
+
+        public bool ShouldSuppressThoughtMote(Thought_Memory thought)
+        {
+            // Define what constitutes "Mass Event" thoughts that should silence motes
+            if (thought.def.defName.Contains("Party") || thought.def.defName.Contains("Ritual"))
+            {
+                return true;
+            }
+            return false;
         }
 
         public override void ExposeData()

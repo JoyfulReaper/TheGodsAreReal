@@ -36,8 +36,6 @@ namespace TheGodsAreReal.Patches
     {
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
-            int tick = Find.TickManager.TicksGame;
-
             if (newThought == null || __instance?.pawn == null)
                 return;
 
@@ -47,20 +45,24 @@ namespace TheGodsAreReal.Patches
             if (__instance.pawn.Ideo?.KeyDeityName == null)
                 return;
 
+            int tick = Find.TickManager.TicksGame;
+
             if (newThought.sourcePrecept != null)
             {
+                //if(newThought.CausedByBeliefInPrecept) TODO Do we want this in stead of aboutt check?
                 Pawn pawn = __instance.pawn;
-
                 var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
+
                 if (tracker != null && tracker.GetLastFavorTick(pawn) == tick)
                     return;
 
+                bool shouldShowMotes = !tracker.ShouldSuppressThoughtMote(newThought);
 
                 float moodOffset = newThought.MoodOffset();
                 if (moodOffset < 0f)
                 {
                     float negativeMultiplier = 0.5f;
-                    tracker.AddFavor(pawn, moodOffset * negativeMultiplier);
+                    tracker.AddFavor(pawn, moodOffset * negativeMultiplier, shouldShowMotes);
                     if (Prefs.DevMode)
                     {
                         Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * negativeMultiplier}");
@@ -69,7 +71,7 @@ namespace TheGodsAreReal.Patches
                 else if (moodOffset > 0f)
                 {
                     float positiveMultiplier = 0.75f;
-                    tracker.AddFavor(pawn, moodOffset * positiveMultiplier);
+                    tracker.AddFavor(pawn, moodOffset * positiveMultiplier, shouldShowMotes);
                     if (Prefs.DevMode)
                     {
                         Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * positiveMultiplier}");
