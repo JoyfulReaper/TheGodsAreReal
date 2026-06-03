@@ -57,10 +57,14 @@ namespace TheGodsAreReal.Patches
 
             Log.Message($"[TheGodsAreReal] Wedding detected! {firstPawn.LabelShort} and {secondPawn.LabelShort} gained {weddingReward} favor.");
 
+            bool showMotes = true;
             Lord lord = firstPawn.GetLord();
             if(lord != null)
             {
-                float guestReward = weddingReward * 0.5f; // Guests gain half the favor of the married couple
+                if(lord.ownedPawns.Count > 10)
+                {
+                    showMotes = false;
+                }
 
                 foreach (var pawn in lord.ownedPawns)
                 {
@@ -69,7 +73,10 @@ namespace TheGodsAreReal.Patches
 
                     if (pawn.IsColonist || pawn.IsSlave)
                     {
-                        if(pawn.Ideo != null && (pawn.Ideo != firstPawn.Ideo || pawn.Ideo != secondPawn.Ideo))
+                        float guestReward = weddingReward * 0.5f; // Guests gain half the favor of the married couple
+
+                        // Pawn doesnt follow ideo of either spouse
+                        if (pawn.Ideo != null && (pawn.Ideo != firstPawn.Ideo && pawn.Ideo != secondPawn.Ideo))
                         {
                             if(Rand.Value < 0.5f)
                             {
@@ -80,13 +87,20 @@ namespace TheGodsAreReal.Patches
                                 guestReward -= 3f;
                             }
                         }
-                        favorTracker.AddFavor(pawn, guestReward);
+                        favorTracker.AddFavor(pawn, guestReward, showMotes);
 
                         if(Prefs.DevMode)
                         {
                             Log.Message($"[TheGodsAreReal] Wedding: {pawn.LabelShort} gained {guestReward} favor.");
                         }
                     }
+                }
+                if (!showMotes)
+                {
+                    Messages.Message(
+                        "Marriage complete: The gods have observed the ceremony. Favor has shifted among the participants.",
+                        MessageTypeDefOf.NeutralEvent
+                    );
                 }
             }
         }

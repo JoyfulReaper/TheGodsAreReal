@@ -54,6 +54,9 @@ namespace TheGodsAreReal.Patches
             Ideo questIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
 
             Pawn accepter = __instance.AccepterPawn;
+
+            bool showMotes = (PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction.Count <= 10) ? true : false;
+
             foreach (Pawn p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
             {
                 if (!p.RaceProps.Humanlike)
@@ -62,17 +65,16 @@ namespace TheGodsAreReal.Patches
                 if (p == accepter)
                 {
                     // Acceptor can get double favor
-                    favorTracker.AddFavor(p, questReward);
+                    float accepterReward = questReward * 2f;
+                    favorTracker.AddFavor(p, accepterReward, showMotes);
                     if (Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal]: QUEST LEADER {p.LabelShort} gained {questReward} favor from quest: {__instance.name}");
+                        Log.Message($"[TheGodsAreReal]: QUEST LEADER {p.LabelShort} gained {accepterReward} favor from quest: {__instance.name}");
                     }
                 }
-
-                // Only reward pawns that follow the colony's main faith
-                if (p.Ideo == questIdeo)
+                else if (p.Ideo == questIdeo)
                 {
-                    favorTracker.AddFavor(p, questReward);
+                    favorTracker.AddFavor(p, questReward, showMotes);
                     if (Prefs.DevMode)
                     {
                         Log.Message($"[TheGodsAreReal]: {p.LabelShort} gained {questReward} favor from quest: {__instance.name}");
@@ -84,15 +86,23 @@ namespace TheGodsAreReal.Patches
                     float roll = Rand.Value;
                     if(roll <0.3f)
                     {
-                        favorTracker.AddFavor(p, questReward);
+                        favorTracker.AddFavor(p, questReward, showMotes);
                         Log.Message($"[TheGodsAreReal]: {p.LabelShort} (Non-believer) gained {questReward} favor from quest: {__instance.name}");
                     }
                     else if (roll < 0.6f)
                     {
-                        favorTracker.AddFavor(p, (questReward * -1) * 0.50f);
+                        favorTracker.AddFavor(p, (questReward * -1) * 0.50f, showMotes);
                         Log.Message($"[TheGodsAreReal]: {p.LabelShort} (Non-believer) lost {questReward} favor from quest: {__instance.name}");
                     }
                 }
+            }
+
+            if (!showMotes)
+            {
+                Messages.Message(
+                    "Quest complete: The gods have observed your quest. Favor has shifted among the participants.",
+                    MessageTypeDefOf.NeutralEvent
+                );
             }
         }
     }

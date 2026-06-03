@@ -169,26 +169,24 @@ namespace TheGodsAreReal
         /// </summary>
         /// <param name="pawn">The pawn to add favor to</param>
         /// <param name="amount">The amount of favor to add, can be negative</param>
-        public void AddFavor(Pawn pawn, float amount)
+        public void AddFavor(Pawn pawn, float amount, bool showMote = true)
         {
             if (pawn == null || !pawn.RaceProps.Humanlike)
                 return;
 
-            if (pawn == null)
+            if (!pawn.IsColonist && !pawn.IsSlave)
                 return;
 
             if (pawn.Ideo == null)
                 return;
 
+            // If the Ideo doesn't have a Deity then don't track favor
+            if (pawn.Ideo.KeyDeityName == null)
+                return;
+
             int tick = Find.TickManager.TicksGame;
             // If the same pawn gained favor in the same tick, ignore the duplicate
             if (_lastFavorTick.ContainsKey(pawn.thingIDNumber) && tick == _lastFavorTick[pawn.thingIDNumber])
-                return;
-
-            _lastFavorTick[pawn.thingIDNumber] = tick;
-
-            // If the Ideo doesn't have a Deity then don't track favor
-            if (pawn.Ideo.KeyDeityName == null) 
                 return;
 
             int id = pawn.thingIDNumber;
@@ -197,6 +195,15 @@ namespace TheGodsAreReal
                 pawnFavor[id] = 0f;
             }
             pawnFavor[id] = Mathf.Clamp(pawnFavor[id] + amount, -100f, 100f);
+
+            if (Mathf.Abs(amount) >= 0.5f && showMote)
+            {
+                Color favorColor = (amount >= 0) ? Color.cyan : Color.red;
+                string text = (amount > 0) ? $"+{amount} Favor" : $"{amount} Favor";
+                MoteMaker.ThrowText(pawn.DrawPos, pawn.Map, text, favorColor, 3.6f);
+            }
+
+            _lastFavorTick[pawn.thingIDNumber] = tick;
         }
 
         /// <summary>
@@ -278,6 +285,13 @@ namespace TheGodsAreReal
         {
             base.ExposeData();
 
+            // Loading
+            if (Scribe.mode == LoadSaveMode.LoadingVars && pawnFavor == null)
+            {
+                pawnFavor = new Dictionary<int, float>();
+            }
+
+            // Saving
             if (Scribe.mode == LoadSaveMode.Saving)
             {
                 HashSet<int> activePawnIds = new HashSet<int>();

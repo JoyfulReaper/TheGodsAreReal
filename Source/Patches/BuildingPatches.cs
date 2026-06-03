@@ -29,6 +29,12 @@ namespace TheGodsAreReal.Patches
             Ideo primaryIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
             var validPawns = __instance.Map.mapPawns.AllPawnsSpawned.Where(p => (p.IsColonist || p.IsSlave) && p.RaceProps.Humanlike);
 
+            var showMotes = true;
+            if (validPawns.Count() > 10)
+            {
+                showMotes = false;
+            }
+
             foreach (var pawn in validPawns)
             {
                 float indvidualReward = baseReward;
@@ -42,7 +48,7 @@ namespace TheGodsAreReal.Patches
                         indvidualReward *= 0.6f;
                     }
 
-                    favorTracker.AddFavor(pawn, indvidualReward);
+                    favorTracker.AddFavor(pawn, indvidualReward, showMotes);
                 }
                 else
                 {
@@ -56,22 +62,35 @@ namespace TheGodsAreReal.Patches
                         indvidualReward = 2f;
                     }
 
-                    favorTracker.AddFavor(pawn, indvidualReward);
+                    favorTracker.AddFavor(pawn, indvidualReward, showMotes);
                 }
 
-                Log.Message($"[TheGodsAreReal] {pawnDesc} gained {indvidualReward} favor from destroying a Divine Threat: {__instance.LabelShort}");
+                if (Prefs.DevMode)
+                {
+                    Log.Message($"[TheGodsAreReal] {pawnDesc} gained {indvidualReward} favor from destroying a Divine Threat: {__instance.LabelShort}");
+                }
             }
-            
+
+            if (!showMotes)
+            {
+                Messages.Message(
+                    "Devine Destruction Complete: The gods have observed the destruction. Favor has shifted among the participants.",
+                    MessageTypeDefOf.NeutralEvent
+                );
+            }
         }
 
         private static bool IsDivineThreat(ThingDef def)
         {
+            if (def.isUnfinishedThing || def.IsWall || def.IsDoor || def.BuildableByPlayer)
+                return false;
+
             if (def.isMechClusterThreat)
                 return true;
 
             if (def.defName.Contains("ShipPart") || def.defName.Contains("MechCluster"))
             {
-                Log.Message($"[TheGodsAreReal]: Identified threat ({def.defName}) by defName.Contains(), please verify.");
+                Log.Warning($"[TheGodsAreReal]: Identified threat ({def.defName}) by defName.Contains(), please verify.");
                 return true;
             }
 

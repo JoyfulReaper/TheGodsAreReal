@@ -78,8 +78,15 @@ namespace TheGodsAreReal.Patches
             // Grab the leader/organizer of the ritual if available to give them a bonus/penalty
             Pawn organizer = jobRitual?.Organizer;
 
+
+            bool showMotes = true;
             if (totalPresence != null)
             {
+                if(totalPresence.Count >= 10)
+                {
+                    showMotes = false;
+                }
+
                 foreach (var kvp in totalPresence)
                 {
                     Pawn participant = kvp.Key;
@@ -102,19 +109,28 @@ namespace TheGodsAreReal.Patches
                             individualFavorChange *= 0.5f;
                         }
 
-                        tracker.AddFavor(participant, individualFavorChange);
+                        tracker.AddFavor(participant, individualFavorChange, showMotes);
                     }
                     else
                     {
                         individualFavorChange = -3f;
-                        tracker.AddFavor(participant, individualFavorChange);
+                        tracker.AddFavor(participant, individualFavorChange, showMotes);
                     }
+
 
                     if (Prefs.DevMode)
                     {
                         Log.Message($"[TheGodsAreReal]: Processed ritual favor change of {individualFavorChange} for {participant.LabelShort}");
                     }
                 }
+                if (!showMotes)
+                {
+                    Messages.Message(
+                        "Ritual complete: The gods have observed the ceremony. Favor has shifted among the participants.",
+                        MessageTypeDefOf.NeutralEvent
+                    );
+                }
+
             }
         }
     }
