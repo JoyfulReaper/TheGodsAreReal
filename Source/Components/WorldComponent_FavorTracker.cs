@@ -28,7 +28,6 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
-using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -40,7 +39,7 @@ namespace TheGodsAreReal
         internal Dictionary<int, float> pawnFavor = new Dictionary<int, float>();
 
         private const int DecayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
-        private const float PassiveDecayAmount = 0.1f; // How much favor slips away per interval
+        private const float PassiveDecayAmount = 0.05f; // How much favor slips away per interval
         private static readonly HediffDef DivineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
         private Dictionary<int, int> _lastFavorTick = new Dictionary<int, int>();
 
