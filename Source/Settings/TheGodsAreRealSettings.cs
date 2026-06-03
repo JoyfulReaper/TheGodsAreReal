@@ -36,7 +36,9 @@ namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
-        private string _version = "0.0.3";
+        private string _version = "0.0.4";
+        private static Vector2 _scrollPos = Vector2.zero;
+        private static int buttonCount = 0;
 
         public string Version
         {
@@ -48,8 +50,27 @@ namespace TheGodsAreReal
 
         public void DoSettingsWindowContents(Rect inRect)
         {
+            int totalButtonCount = Prefs.DevMode ? TheGodsAreRealDebugSettings.debugButtonCount : buttonCount;
+            var trackedPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
+                           .Where(p => p.RaceProps.Humanlike).ToList();
+
+            int pawnCount = Prefs.DevMode ? trackedPawns.Count : 0;
+
+            float calculatedHeight = (totalButtonCount * 35f) + (pawnCount * 30f) + 100f; // 100f for padding/headers
+            Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
+
+            Widgets.BeginScrollView(inRect, ref _scrollPos, viewRect);
+
+            Listing_Standard listing = new Listing_Standard();
+            listing.Begin(viewRect);
+            listing.Label($"The Gods Are Real {Version}", 24f);
+
+
             if (Prefs.DevMode)
-                TheGodsAreRealDebugSettings.DoDebugSettingsWindowContents(inRect);
+                TheGodsAreRealDebugSettings.DoDebugSettingsWindowContents(listing, trackedPawns);
+
+            listing.End();
+            Widgets.EndScrollView();
         }
 
         public override void ExposeData()

@@ -1,4 +1,5 @@
 ﻿using RimWorld;
+using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Verse;
@@ -8,24 +9,11 @@ namespace TheGodsAreReal.Settings
 {
     internal static class TheGodsAreRealDebugSettings
     {
-        private static Vector2 _scrollPos = Vector2.zero;
+        internal static int debugButtonCount = 6;
 
-        internal static void DoDebugSettingsWindowContents(Rect inRect)
+        internal static void DoDebugSettingsWindowContents(Listing_Standard listing, List<Pawn> pawns)
         {
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
-
-            int buttonCount = 6;
-            int pawnCount = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
-                           .Where(p => p.RaceProps.Humanlike).Count();
-
-            float calculatedHeight = (buttonCount * 35f) + (pawnCount * 30f) + 100f; // 100f for padding/headers
-
-            Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
-
-            Widgets.BeginScrollView(inRect, ref _scrollPos, viewRect);
-
-            Listing_Standard listing = new Listing_Standard();
-            listing.Begin(viewRect);
             listing.Label("Dev Mode Settings", 24f);
 
             // Add 10 Favor
@@ -131,10 +119,7 @@ namespace TheGodsAreReal.Settings
             }
 
             DoDebugDataOverview(listing);
-            DoPawnFavorList(listing);
-
-            listing.End();
-            Widgets.EndScrollView();
+            DoPawnFavorList(listing, pawns);
         }
 
         internal static void DoDebugDataOverview(Listing_Standard listing)
@@ -162,15 +147,12 @@ namespace TheGodsAreReal.Settings
             }
         }
 
-        internal static void DoPawnFavorList(Listing_Standard listing)
+        internal static void DoPawnFavorList(Listing_Standard listing, List<Pawn> pawns)
         {
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker == null) return;
 
             listing.Label("--- Colony Favor Overview ---", 24f);
-
-            var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
-                           .Where(p => p.RaceProps.Humanlike);
 
             foreach (Pawn p in pawns)
             {
