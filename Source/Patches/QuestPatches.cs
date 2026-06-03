@@ -27,6 +27,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 using HarmonyLib;
 using RimWorld;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -99,8 +100,15 @@ namespace TheGodsAreReal.Patches
 
             if (!showMotes)
             {
+                var targets = __instance.QuestLookTargets;
+
+                LookTargets finalTarget = targets.Any()
+                                            ? new LookTargets(targets)
+                                            : new LookTargets();
+
                 Messages.Message(
                     "Quest complete: The gods have observed your quest. Favor has shifted among the participants.",
+                    finalTarget,
                     MessageTypeDefOf.NeutralEvent
                 );
             }

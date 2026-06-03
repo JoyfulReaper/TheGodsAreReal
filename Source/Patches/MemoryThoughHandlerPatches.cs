@@ -49,7 +49,6 @@ namespace TheGodsAreReal.Patches
 
             if (newThought.sourcePrecept != null)
             {
-                //if(newThought.CausedByBeliefInPrecept) TODO Do we want this in stead of aboutt check?
                 Pawn pawn = __instance.pawn;
                 var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
 
