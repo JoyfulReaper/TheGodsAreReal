@@ -64,11 +64,11 @@ namespace TheGodsAreReal
             List<Map> maps = Find.Maps;
             for (int m = 0; m < maps.Count; m++)
             {
-                // Grab all free colonists on the current map
-                List<Pawn> freeColonists = maps[m].mapPawns.FreeColonists;
-                for (int p = 0; p < freeColonists.Count; p++)
+                // Grab all colonists on the current map
+                List<Pawn> playerPawns = maps[m].mapPawns.PawnsInFaction(Faction.OfPlayer);
+                for (int p = 0; p < playerPawns.Count; p++)
                 {
-                    Pawn pawn = freeColonists[p];
+                    Pawn pawn = playerPawns[p];
 
                     if (pawn == null || !pawn.Spawned || pawn.Dead)
                         continue;

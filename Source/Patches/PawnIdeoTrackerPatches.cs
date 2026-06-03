@@ -29,8 +29,6 @@ using HarmonyLib;
 using RimWorld;
 using Verse;
 
-// TODO: Balance favor
-
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(Pawn_IdeoTracker), nameof(Pawn_IdeoTracker.SetIdeo))]
@@ -38,7 +36,7 @@ namespace TheGodsAreReal.Patches
     {
         public static void Prefix(Pawn_IdeoTracker __instance, Ideo ideo, Pawn ___pawn)
         {
-            if (___pawn == null || __instance.Ideo == ideo)
+            if (___pawn == null || __instance.Ideo == ideo || !___pawn.IsColonist)
                 return;
 
             if(__instance.Ideo != ideo)
