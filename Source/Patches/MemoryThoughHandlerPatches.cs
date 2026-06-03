@@ -36,6 +36,8 @@ namespace TheGodsAreReal.Patches
     {
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
+            int tick = Find.TickManager.TicksGame;
+
             if (newThought == null || __instance?.pawn == null)
                 return;
 
@@ -47,13 +49,14 @@ namespace TheGodsAreReal.Patches
 
             if (newThought.sourcePrecept != null)
             {
+                Pawn pawn = __instance.pawn;
+
                 var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
-                if (tracker == null)
+                if (tracker != null && tracker.GetLastFavorTick(pawn) == tick)
                     return;
 
-                Pawn pawn = __instance.pawn;
-                float moodOffset = newThought.MoodOffset();
 
+                float moodOffset = newThought.MoodOffset();
                 if (moodOffset < 0f)
                 {
                     float negativeMultiplier = 0.5f;

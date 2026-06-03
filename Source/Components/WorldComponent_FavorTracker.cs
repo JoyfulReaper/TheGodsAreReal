@@ -42,6 +42,7 @@ namespace TheGodsAreReal
         private const int DecayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
         private const float PassiveDecayAmount = 0.1f; // How much favor slips away per interval
         private static readonly HediffDef DivineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
+        private Dictionary<int, int> _lastFavorTick = new Dictionary<int, int>();
 
         public WorldComponent_FavorTracker(World world) : base(world) { }
 
@@ -174,12 +175,18 @@ namespace TheGodsAreReal
             if (pawn == null || !pawn.RaceProps.Humanlike)
                 return;
 
-
             if (pawn == null)
                 return;
 
             if (pawn.Ideo == null)
                 return;
+
+            int tick = Find.TickManager.TicksGame;
+            // If the same pawn gained favor in the same tick, ignore the duplicate
+            if (_lastFavorTick.ContainsKey(pawn.thingIDNumber) && tick == _lastFavorTick[pawn.thingIDNumber])
+                return;
+
+            _lastFavorTick[pawn.thingIDNumber] = tick;
 
             // If the Ideo doesn't have a Deity then don't track favor
             if (pawn.Ideo.KeyDeityName == null) 
@@ -226,6 +233,11 @@ namespace TheGodsAreReal
             {
                 Log.Message($"[TheGodsAreReal] Reset favor for {pawn.LabelShort} due to ideology change.");
             }
+        }
+
+        public int GetLastFavorTick(Pawn pawn)
+        {
+            return _lastFavorTick.TryGetValue(pawn.thingIDNumber, out int tick) ? tick : -1;
         }
 
         public bool PawnWorships(Pawn pawn, PreceptDef godPrecept)
