@@ -55,6 +55,9 @@ namespace TheGodsAreReal.Patches
             Pawn accepter = __instance.AccepterPawn;
             foreach (Pawn p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
             {
+                if (!p.RaceProps.Humanlike)
+                    continue;
+
                 if (p == accepter)
                 {
                     // Acceptor can get double favor
