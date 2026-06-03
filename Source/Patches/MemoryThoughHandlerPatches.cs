@@ -56,18 +56,20 @@ namespace TheGodsAreReal.Patches
 
                 if (moodOffset < 0f)
                 {
-                    tracker.AddFavor(pawn, moodOffset * 0.5f);
+                    float negativeMultiplier = 0.5f;
+                    tracker.AddFavor(pawn, moodOffset * negativeMultiplier);
                     if (Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal]: A thought caused {pawn.LabelShort}'s favor to change by: {moodOffset * 0.5f}");
+                        Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * negativeMultiplier}");
                     }
                 }
                 else if (moodOffset > 0f)
                 {
-                    tracker.AddFavor(pawn, moodOffset * 0.25f);
+                    float positiveMultiplier = 0.75f;
+                    tracker.AddFavor(pawn, moodOffset * positiveMultiplier);
                     if (Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal]: A thought caused {pawn.LabelShort}'s favor to change by: {moodOffset * 0.25f}");
+                        Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * positiveMultiplier}");
                     }
                 }
             }

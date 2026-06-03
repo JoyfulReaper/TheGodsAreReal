@@ -63,6 +63,11 @@ namespace TheGodsAreReal.Patches
                 action = delegate
                 {
                     Messages.Message($"[TheGodsAreReal] {__instance.LabelShort.ToUpper()}: -> Individual Favor: {individualFavor:F1} / 100.0 -> Ideo Avg Favor:   {ideoFavor:F1}", MessageTypeDefOf.NeutralEvent);
+                    Log.Message($"========================================");
+                    Log.Message($"[TheGodsAreReal] DEBUG FOR {__instance.LabelShort.ToUpper()}:");
+                    Log.Message($"-> Individual Favor: {individualFavor:F1} / 100.0");
+                    Log.Message($"-> Ideo Avg Favor:   {ideoFavor:F1}");
+                    Log.Message($"========================================");
                 }
             };
         }
