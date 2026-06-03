@@ -18,7 +18,7 @@ namespace TheGodsAreReal.Settings
             int pawnCount = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
                            .Where(p => p.RaceProps.Humanlike).Count();
 
-            float calculatedHeight = (buttonCount * 35f) + (pawnCount * 30f) + 200f; // 200f for padding/headers
+            float calculatedHeight = (buttonCount * 35f) + (pawnCount * 30f) + 100f; // 100f for padding/headers
 
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
 

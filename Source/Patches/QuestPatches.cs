@@ -41,7 +41,8 @@ namespace TheGodsAreReal.Patches
                 return;
 
             var favorTracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
-            if (favorTracker == null) return;
+            if (favorTracker == null) 
+                return;
 
             // Base reward of 5, plus 5 for every challenge star
             // A 0-star quest gives 5, a 4-star quest gives 25
