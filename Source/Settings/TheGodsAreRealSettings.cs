@@ -36,7 +36,7 @@ namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
-        private string _version = "0.0.11";
+        private string _version = "0.0.12";
         private static Vector2 _scrollPos = Vector2.zero;
         private static int buttonCount = 0;
         internal bool AlwaysShowMotes = false;
