@@ -33,24 +33,28 @@ using Verse;
 [HarmonyPatch(typeof(RimWorld.JobDriver_Meditate), "MeditationTick")]
 public static class JobDriver_Meditate_MeditationTick
 {
+    private const float PrayerFavorGain = 0.5f;
+    private const float PrayerGainTickFrequency = 250;
+
     static void Postfix(RimWorld.JobDriver_Meditate __instance)
     {
         // Check if the current job is indeed the prayer one
         if (__instance.job?.def == JobDefOf.MeditatePray)
         {
             Pawn p = __instance.pawn;
+            if (p == null || p.Dead || !p.Spawned || !p.RaceProps.Humanlike) 
+                return;
 
-            if(Find.TickManager.TicksGame % 250 == 0)
+            if (Find.TickManager.TicksGame % PrayerGainTickFrequency == 0)
             {
                 var favorTracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
                 if (favorTracker != null)
                 {
-                    float favorGained = 0.5f;
-                    favorTracker.AddFavor(p, favorGained);
+                    favorTracker.AddFavor(p, PrayerFavorGain);
 
                     if (Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal] {p.LabelShort} is actively praying. Gained {favorGained} favor.");
+                        Log.Message($"[TheGodsAreReal] {p.LabelShort} is actively praying. Gained {PrayerFavorGain} favor.");
                     }
                 }
             }

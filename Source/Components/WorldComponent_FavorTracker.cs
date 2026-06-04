@@ -33,6 +33,7 @@ using TheGodsAreReal.Handlers;
 using UnityEngine;
 using Verse;
 using TheGodsAreReal.Utilities;
+using Verse.Noise;
 
 namespace TheGodsAreReal
 {
@@ -57,6 +58,8 @@ namespace TheGodsAreReal
         // Hediff just used for testing right now
         private static readonly HediffDef _divineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
 
+        private const int RareTickValue = 250; 
+
         private TheGodsAreRealSettings Settings => LoadedModManager.GetMod<TheGodsAreRealMod>().GetSettings<TheGodsAreRealSettings>();
 
         public IReadOnlyDictionary<Pawn, float> PawnFavor => 
@@ -76,7 +79,7 @@ namespace TheGodsAreReal
             }
 
             // Rare Tick //
-            if (Find.TickManager.TicksGame % 250 != 0)
+            if (Find.TickManager.TicksGame % RareTickValue != 0)
                 return;
 
             RareTick();

@@ -31,7 +31,11 @@ namespace TheGodsAreReal.Handlers
 {
     public static class ConversionHandler
     {
-        public static void HandleConversionFavor(Pawn initiator, Pawn recipient, bool wasSuccessful,string logContext)
+        private const float BaseConverterReward = 2f;
+        private const float BaseConverteePenalty = -1f;
+        private const float SuccessfullConversionReward = 10f;
+
+        public static void HandleConversionFavor(Pawn initiator, Pawn recipient, bool wasSuccessful, string logContext)
         {
             if (initiator == null || recipient == null)
                 return;
@@ -43,24 +47,22 @@ namespace TheGodsAreReal.Handlers
             if (tracker == null)
                 return;
 
-            float converterReward = 2f;
-            float converteePenalty = -1f;
-
+            var converterReward = BaseConverterReward;
             if (wasSuccessful)
             {
-                converterReward = 10f;
+                converterReward = SuccessfullConversionReward;
             }
 
             // Reward the converter
-            if (initiator.IsColonist || initiator.IsSlave)
+            if (initiator.IsColonist || initiator.IsSlaveOfColony)
             {
                 tracker.AddFavor(initiator, converterReward, showMote: true);
             }
 
             // Punish the convertee
-            if (recipient.IsColonist || recipient.IsSlave)
+            if (recipient.IsColonist || recipient.IsSlaveOfColony)
             {
-                tracker.AddFavor(recipient, converteePenalty, showMote: true);
+                tracker.AddFavor(recipient, BaseConverteePenalty, showMote: true);
             }
 
             if (Prefs.DevMode)
