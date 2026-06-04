@@ -105,7 +105,15 @@ namespace TheGodsAreReal.Utilities
 
         public static List<Pawn> GetPawnsInMentalState(Map map, MentalStateDef stateDef)
         {
-            return map.mapPawns.AllPawnsSpawned.Where(p => p.InMentalState && p.MentalStateDef == stateDef).ToList();
+            var allPawns = map.mapPawns.AllPawnsSpawned;
+            List<Pawn> result = new List<Pawn>();
+            for (int i = 0; i < allPawns.Count; i++)
+            {
+                Pawn p = allPawns[i];
+                if (p.InMentalState && p.MentalStateDef == stateDef)
+                    result.Add(p);
+            }
+            return result;
         }
 
         public static List<Pawn> GetPawnsCurrentlyPraying(Map map)
