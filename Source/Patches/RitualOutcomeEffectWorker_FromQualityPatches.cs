@@ -37,9 +37,36 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(RitualOutcomeEffectWorker_FromQuality), nameof(RitualOutcomeEffectWorker_FromQuality.Apply))]
     public static class RitualOutcomeEffectWorker_FromQuality_Apply
     {
+        // Perfomance affecting options
+        private const int DisableMotesThreshold = 10;
+
+        // Ritual Quality
+        private const float AwfulQualityThreshold = 0.25f;
+        private const float FlawedQualityThreshold = 0.60f;
+        private const float SatisfyingQualityThreshold = 0.90f;
+        private const float SpectacularQualityThreshold = 1.0f;
+
+        // Favor Rewards/Penalties
+        private const float BaseFavorChange = 0f;
+        private const float AwfulFavorChange = -5f;
+        private const float FlawedFavorChange = 2f;
+        private const float SatisfyingFavorChange = 8f;
+        private const float SpectacularFavorChange = 20f;
+        private const float DisbelieverPenalty = -0.3f;
+
+        // Modifies and Threshholds
+        private const float OrganizerBonusMultiplier = 1.25f;
+        private const float HighFavorPenaltyThreshold = 60f;
+        private const float HighFavorPenaltyMultiplier = 0.5f;
+
+
         public static void Postfix(RitualOutcomeEffectWorker_FromQuality __instance, float progress, Dictionary<Pawn, int> totalPresence, LordJob_Ritual jobRitual)
         {
-            if (jobRitual == null)
+            if (jobRitual == null || totalPresence == null)
+                return;
+
+            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
+            if (tracker == null)
                 return;
 
             //Calculate quality again
@@ -51,89 +78,81 @@ namespace TheGodsAreReal.Patches
                 Log.Message($"[TheGodsAreReal] Ritual ended with quality: {quality:F2}");
             }
 
-            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
-            if (tracker == null)
-                return;
-
-            // Step-logic to calculate favor based on standard RimWorld outcome brackets
-            float baseFavorChange = 0f;
-
-            if (quality < 0.25f) // Awful / Boring
+            
+            float favorChange = BaseFavorChange;
+            if (quality < AwfulQualityThreshold) // Awful / Boring
             {
-                baseFavorChange = -5f; // Displeased gods
+                favorChange = AwfulFavorChange; // Displeased gods
             }
-            else if (quality < 0.60f) // Flawed / Boring / Ordinary
+            else if (quality < FlawedQualityThreshold) // Flawed / Boring / Ordinary
             {
-                baseFavorChange = 2f; // Minimal acknowledgment
+                favorChange = FlawedFavorChange; // Minimal acknowledgment
             }
-            else if (quality < 0.90f) // Satisfying / Fun
+            else if (quality < SatisfyingQualityThreshold) // Satisfying / Fun
             {
-                baseFavorChange = 8f; // Decent blessing
+                favorChange = SatisfyingFavorChange; // Decent blessing
             }
             else // Spectacular / Unforgettable (0.90 to 1.0+)
             {
-                baseFavorChange = 20f; // Divine favor rain
+                favorChange = SpectacularFavorChange; // Divine favor rain
             }
 
             // Grab the leader/organizer of the ritual if available to give them a bonus/penalty
             Pawn organizer = jobRitual?.Organizer;
 
-
             bool showMotes = true;
-            if (totalPresence != null)
+
+            if(totalPresence.Count >= DisableMotesThreshold)
             {
-                if(totalPresence.Count >= 10)
-                {
-                    showMotes = false;
-                }
-
-                foreach (var kvp in totalPresence)
-                {
-                    Pawn participant = kvp.Key;
-                    if (participant == null)
-                        continue;
-
-                    float individualFavorChange = baseFavorChange;
-
-                    // Give the organizer 25% extra impact for the outcome
-                    if (participant == organizer)
-                    {
-                        individualFavorChange *= 1.25f;
-                    }
-
-                    if (participant.Ideo == ritualIdeo)
-                    {
-                        var currentFavor = tracker.GetFavor(participant);
-                        if (currentFavor > 60f)
-                        {
-                            individualFavorChange *= 0.5f;
-                        }
-
-                        tracker.AddFavor(participant, individualFavorChange, showMotes);
-                    }
-                    else
-                    {
-                        individualFavorChange = -3f;
-                        tracker.AddFavor(participant, individualFavorChange, showMotes);
-                    }
-
-
-                    if (Prefs.DevMode)
-                    {
-                        Log.Message($"[TheGodsAreReal]: Processed ritual favor change of {individualFavorChange} for {participant.LabelShort}");
-                    }
-                }
-
-                if (!showMotes)
-                {
-                    Messages.Message(
-                        "Ritual complete: The gods have observed the ceremony. Favor has shifted among the participants.",
-                        organizer ?? new LookTargets(jobRitual.Map.Center, jobRitual.Map),
-                        MessageTypeDefOf.NeutralEvent
-                    );
-                }
-
+                showMotes = false;
             }
+
+            foreach (var kvp in totalPresence)
+            {
+                Pawn participant = kvp.Key;
+                if (participant == null)
+                    continue;
+
+                float individualFavorChange = favorChange;
+
+                // Give the organizer 25% extra impact for the outcome
+                if (participant == organizer)
+                {
+                    individualFavorChange *= OrganizerBonusMultiplier;
+                }
+
+                if (participant.Ideo == ritualIdeo)
+                {
+                    var currentFavor = tracker.GetFavor(participant);
+                    if (currentFavor > HighFavorPenaltyThreshold)
+                    {
+                        individualFavorChange *= HighFavorPenaltyMultiplier;
+                    }
+
+                    tracker.AddFavor(participant, individualFavorChange, showMotes);
+                }
+                else
+                {
+                    individualFavorChange = DisbelieverPenalty;
+                    tracker.AddFavor(participant, individualFavorChange, showMotes);
+                }
+
+
+                if (Prefs.DevMode)
+                {
+                    Log.Message($"[TheGodsAreReal]: Processed ritual favor change of {individualFavorChange} for {participant.LabelShort}");
+                }
+            }
+
+            if (!showMotes)
+            {
+                Messages.Message(
+                    "Ritual complete: The gods have observed the ceremony. Favor has shifted among the participants.",
+                    organizer ?? new LookTargets(jobRitual.Map.Center, jobRitual.Map),
+                    MessageTypeDefOf.NeutralEvent
+                );
+            }
+            
 
             if(Prefs.DevMode)
                 Log.Message($"[TheGodsAreReal] Participant count: {totalPresence.Count}, showMotes: {showMotes}");
