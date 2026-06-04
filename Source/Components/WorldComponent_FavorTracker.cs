@@ -169,6 +169,11 @@ namespace TheGodsAreReal
                 _pawnFavor.Remove(idsToPurge[i]);
                 _lastFavorTick.Remove(idsToPurge[i]);
             }
+
+            if (Prefs.DevMode)
+            {
+                Log.Message($"[TheGodsAreReal] Background divine decay processed for {_pawnFavor.Count} tracked pawns.");
+            }
         }
 
 
