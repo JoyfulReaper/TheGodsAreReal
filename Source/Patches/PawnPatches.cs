@@ -35,6 +35,16 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.GetGizmos))]
     public static class Pawn_GetGizmos
     {
+        [HarmonyPatch(typeof(Pawn), nameof(Pawn.Kill))]
+        public static class Patch_Pawn_Kill
+        {
+            public static void Postfix(Pawn __instance)
+            {
+                Find.World.GetComponent<WorldComponent_FavorTracker>()?.Notify_PawnDied(__instance);
+            }
+        }
+
+
         public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Pawn __instance)
         {
             foreach (var gizmo in __result)

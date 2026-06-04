@@ -29,6 +29,7 @@ using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
 using System.Linq;
+using TheGodsAreReal.Handlers;
 using UnityEngine;
 using Verse;
 
@@ -326,6 +327,16 @@ namespace TheGodsAreReal
         {
             _pawnFavor.Clear();
             Log.Warning("!!![TheGodsAreReal] All favor data DELETED!!!");
+        }
+
+        public void Notify_PawnDied(Pawn pawn)
+        {
+            float favor = GetFavor(pawn);
+            FavorEventHandler.HandlePawnDeath(pawn, favor);
+
+            // clean up the tracker data
+            _pawnFavor.Remove(pawn.thingIDNumber);
+            _lastFavorTick.Remove(pawn.thingIDNumber);
         }
 
         public override void ExposeData()
