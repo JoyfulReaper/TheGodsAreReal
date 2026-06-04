@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace TheGodsAreReal.Handlers
 {
     [StaticConstructorOnStartup]
-    public static class FavorEventHandler
+    public static class PawnDeathHandler
     {
         public static void HandlePawnDeath(Pawn pawn, float favor)
         {
@@ -13,6 +13,9 @@ namespace TheGodsAreReal.Handlers
             {
                 Log.Message($"[TheGodsAreReal] Processing death of {pawn.LabelShort}. Favor was {favor}.");
             }
+
+            if (pawn == null || !pawn.RaceProps.Humanlike)
+                return;
 
             if (pawn.Map == null || pawn.Ideo == null)
                 return;

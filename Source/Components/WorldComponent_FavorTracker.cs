@@ -332,7 +332,7 @@ namespace TheGodsAreReal
         public void Notify_PawnDied(Pawn pawn)
         {
             float favor = GetFavor(pawn);
-            FavorEventHandler.HandlePawnDeath(pawn, favor);
+            PawnDeathHandler.HandlePawnDeath(pawn, favor);
 
             // clean up the tracker data
             _pawnFavor.Remove(pawn.thingIDNumber);

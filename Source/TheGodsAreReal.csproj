@@ -53,7 +53,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Handlers\FavorEventHandler.cs" />
+    <Compile Include="Handlers\PawnDeathHandler.cs" />
     <Compile Include="Patches\BuildingPatches.cs" />
     <Compile Include="Patches\JobDriver_Meditate_MeditationTick.cs" />
     <Compile Include="Patches\MarriageCeremonyUtilityPatches.cs" />
