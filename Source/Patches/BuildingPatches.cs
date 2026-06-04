@@ -27,7 +27,7 @@ namespace TheGodsAreReal.Patches
             }
 
             Ideo primaryIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
-            var validPawns = __instance.Map.mapPawns.AllPawnsSpawned.Where(p => (p.IsColonist || p.IsSlave) && p.RaceProps.Humanlike);
+            var validPawns = __instance.Map.mapPawns.AllPawnsSpawned.Where(p => (p.IsColonist || p.IsSlaveOfColony) && p.RaceProps.Humanlike);
 
             var showMotes = true;
             if (validPawns.Count() > 10)
