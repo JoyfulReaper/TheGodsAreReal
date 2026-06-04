@@ -49,9 +49,12 @@ namespace TheGodsAreReal.Patches
     {
         public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Pawn __instance)
         {
-            foreach (var gizmo in __result)
+            if (__result != null)
             {
-                yield return gizmo;
+                foreach (var gizmo in __result)
+                {
+                    yield return gizmo;
+                }
             }
 
             if (!Prefs.DevMode)
