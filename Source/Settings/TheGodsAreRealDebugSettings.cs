@@ -1,7 +1,33 @@
-﻿using RimWorld;
+﻿/**
+BSD 2-Clause License
+
+Copyright (c) 2026, Kyle Givler
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+1. Redistributions of source code must retain the above copyright notice, this
+   list of conditions and the following disclaimer.
+
+2. Redistributions in binary form must reproduce the above copyright notice,
+   this list of conditions and the following disclaimer in the documentation
+   and/or other materials provided with the distribution.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ **/
+
+using RimWorld;
 using System.Collections.Generic;
 using System.Linq;
-using UnityEngine;
 using Verse;
 using Verse.AI;
 
@@ -9,7 +35,7 @@ namespace TheGodsAreReal.Settings
 {
     internal static class TheGodsAreRealDebugSettings
     {
-        internal static int debugButtonCount = 6;
+        internal const int DebugButtonCount = 6;
 
         internal static void DoDebugSettingsWindowContents(Listing_Standard listing, List<Pawn> pawns)
         {
@@ -122,7 +148,7 @@ namespace TheGodsAreReal.Settings
             DoPawnFavorList(listing, pawns);
         }
 
-        internal static void DoDebugDataOverview(Listing_Standard listing)
+        private static void DoDebugDataOverview(Listing_Standard listing)
         {
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker == null) return;
@@ -147,7 +173,7 @@ namespace TheGodsAreReal.Settings
             }
         }
 
-        internal static void DoPawnFavorList(Listing_Standard listing, List<Pawn> pawns)
+        private static void DoPawnFavorList(Listing_Standard listing, List<Pawn> pawns)
         {
             WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker == null) return;
