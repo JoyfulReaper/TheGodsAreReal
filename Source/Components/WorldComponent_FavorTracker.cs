@@ -32,6 +32,7 @@ using System.Linq;
 using TheGodsAreReal.Handlers;
 using UnityEngine;
 using Verse;
+using TheGodsAreReal.Utilities;
 
 namespace TheGodsAreReal
 {
@@ -89,34 +90,15 @@ namespace TheGodsAreReal
         // TODO Make a handler for hediffs
         private void ApplyHediffs()
         {
-            // Grab all maps currently loaded in the game
-            List<Map> maps = Find.Maps;
-            for (int m = 0; m < maps.Count; m++)
+            var colonists = GodsAreRealPawnUtility.GetAllColonyPawns();
+
+            for (int i = 0; i < colonists.Count; i++)
             {
-                // Grab all colonists on the current map
-                List<Pawn> freeColonists = maps[m].mapPawns.FreeColonists;
-                for (int p = 0; p < freeColonists.Count; p++)
-                {
-                    Pawn pawn = freeColonists[p];
+                Pawn pawn = colonists[i];
+                if (pawn == null || pawn.Dead || !pawn.RaceProps.Humanlike || pawn.Ideo?.KeyDeityName == null)
+                    continue;
 
-                    if (pawn == null || !pawn.Spawned || pawn.Dead)
-                        continue;
-
-                    if (pawn.Ideo?.KeyDeityName == null || !pawn.RaceProps.Humanlike)
-                        continue;
-
-                    UpdatePawnDivineHediff(pawn);
-                }
-
-                List<Pawn> slaves = maps[m].mapPawns.SlavesAndPrisonersOfColonySpawned;
-                for (int s = 0; s < slaves.Count; s++)
-                {
-                    Pawn pawn = slaves[s];
-                    if (pawn != null && pawn.Spawned && !pawn.Dead && pawn.Ideo?.KeyDeityName != null)
-                    {
-                        UpdatePawnDivineHediff(pawn);
-                    }
-                }
+                UpdatePawnDivineHediff(pawn);
             }
         }
 

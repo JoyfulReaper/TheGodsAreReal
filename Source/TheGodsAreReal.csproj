@@ -72,6 +72,7 @@
     <Compile Include="Settings\TheGodsAreRealSettings.cs" />
     <Compile Include="Thoughts\ThoughtWorker_GodFavor.cs" />
     <Compile Include="Components\WorldComponent_FavorTracker.cs" />
+    <Compile Include="Utilities\GodsAreRealPawnUtility.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Defs\" />
