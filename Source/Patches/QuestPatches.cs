@@ -36,6 +36,17 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(Quest), nameof(Quest.End))]
     public static class Quest_End
     {
+        private const float BaseFavorReward = 5f;
+        private const float QuestRatingMultiplier = 5f;
+        private const float AcceptorFavorMultiplier = 2f;
+
+        private const float NonBelieverFavorGainChance = 0.3f;
+        private const float NonBelieverFavorLossChance = 0.6f;
+        private const float NonBelieverFavorLossMultiplier = 0.5f;
+
+        // Perfomance affecting options
+        private const int DisableMotesThreshold = 10;
+
         public static void Postfix(Quest __instance, QuestEndOutcome outcome)
         {
             if (outcome != QuestEndOutcome.Success)
@@ -45,20 +56,17 @@ namespace TheGodsAreReal.Patches
             if (favorTracker == null) 
                 return;
 
-            // Base reward of 5, plus 5 for every challenge star
-            // A 0-star quest gives 5, a 4-star quest gives 25
-            float baseReward = 5f;
             int rating = Mathf.Max(0, __instance.challengeRating);
-            float questReward = baseReward + (rating * 5f);
+            float questReward = BaseFavorReward + (rating * QuestRatingMultiplier);
 
             // Use the Colony's primary Ideo as the baseline for divine rewards
             Ideo questIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
-
             Pawn accepter = __instance.AccepterPawn;
 
-            bool showMotes = (PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction.Count <= 10) ? true : false;
+            var colonyPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
+            bool showMotes = colonyPawns.Count <= DisableMotesThreshold;
 
-            foreach (Pawn p in PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction)
+            foreach (Pawn p in colonyPawns)
             {
                 if (!p.RaceProps.Humanlike)
                     continue;
@@ -66,7 +74,7 @@ namespace TheGodsAreReal.Patches
                 if (p == accepter)
                 {
                     // Acceptor can get double favor
-                    float accepterReward = questReward * 2f;
+                    float accepterReward = questReward * AcceptorFavorMultiplier;
                     favorTracker.AddFavor(p, accepterReward, showMotes);
                     if (Prefs.DevMode)
                     {
@@ -85,15 +93,25 @@ namespace TheGodsAreReal.Patches
                 {
                     // Pawn is not main ideo
                     float roll = Rand.Value;
-                    if(roll <0.3f)
+                    if (roll < NonBelieverFavorGainChance)
                     {
                         favorTracker.AddFavor(p, questReward, showMotes);
-                        Log.Message($"[TheGodsAreReal]: {p.LabelShort} (Non-believer) gained {questReward} favor from quest: {__instance.name}");
+                        if (Prefs.DevMode)
+                        {
+                            Log.Message($"[TheGodsAreReal]: {p.LabelShort} (Non-believer) gained {questReward} favor from quest: {__instance.name}");
+                        }
                     }
-                    else if (roll < 0.6f)
+                    else if (roll < NonBelieverFavorGainChance + NonBelieverFavorLossChance)
                     {
-                        favorTracker.AddFavor(p, (questReward * -1) * 0.50f, showMotes);
-                        Log.Message($"[TheGodsAreReal]: {p.LabelShort} (Non-believer) lost {questReward} favor from quest: {__instance.name}");
+                        favorTracker.AddFavor(p, (-questReward) * NonBelieverFavorLossMultiplier, showMotes);
+                        if (Prefs.DevMode)
+                        {
+                            Log.Message($"[TheGodsAreReal]: {p.LabelShort} (Non-believer) lost {questReward} favor from quest: {__instance.name}");
+                        }
+                    }
+                    else
+                    {
+                        // No change for this pawn
                     }
                 }
             }
