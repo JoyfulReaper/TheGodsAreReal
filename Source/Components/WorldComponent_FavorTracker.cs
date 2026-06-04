@@ -251,6 +251,15 @@ namespace TheGodsAreReal
 
         public int GetLastFavorTick(Pawn pawn)
         {
+            if (_lastFavorTick == null)
+            {
+                _lastFavorTick = new Dictionary<int, int>();
+
+                Log.Warning("[TheGodsAreReal]: Dude, the _lastFavorTick dict was missing, WTF?");
+
+                return -1;
+            }
+
             if (pawn == null) return -1;
 
             int id = pawn.thingIDNumber;
@@ -318,14 +327,14 @@ namespace TheGodsAreReal
         {
             base.ExposeData();
 
-            // Loading
-            if (Scribe.mode == LoadSaveMode.LoadingVars && _pawnFavor == null)
-            {
-                if (_pawnFavor == null) 
-                    _pawnFavor = new Dictionary<int, float>();
-                if (_lastFavorTick == null) 
-                    _lastFavorTick = new Dictionary<int, int>();
-            }
+            Scribe_Collections.Look(ref _pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
+            Scribe_Collections.Look(ref _lastFavorTick, "lastFavorTick", LookMode.Value, LookMode.Value);
+
+            if (_pawnFavor == null)
+                _pawnFavor = new Dictionary<int, float>();
+
+            if (_lastFavorTick == null)
+                _lastFavorTick = new Dictionary<int, int>();
 
             // Saving
             if (Scribe.mode == LoadSaveMode.Saving)
@@ -367,6 +376,7 @@ namespace TheGodsAreReal
                 for (int i = 0; i < keysToRemove.Count; i++)
                 {
                     _pawnFavor.Remove(keysToRemove[i]);
+                    _lastFavorTick.Remove(keysToRemove[i]);
                 }
 
                 if (keysToRemove.Count > 0 && Prefs.DevMode)
@@ -374,9 +384,6 @@ namespace TheGodsAreReal
                     Log.Message($"[TheGodsAreReal] Purged {keysToRemove.Count} dead/discarded pawn IDs from favor tracking.");
                 }
             }
-
-            Scribe_Collections.Look(ref _pawnFavor, "pawnFavor", LookMode.Value, LookMode.Value);
-            Scribe_Collections.Look(ref _lastFavorTick, "lastFavorTick", LookMode.Value, LookMode.Value);
         }
     }
 }
