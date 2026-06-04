@@ -36,7 +36,7 @@ namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
-        private string _version = "0.0.5";
+        private string _version = "0.0.6";
         private static Vector2 _scrollPos = Vector2.zero;
         private static int buttonCount = 0;
         internal bool AlwaysShowMotes = false;
@@ -57,21 +57,23 @@ namespace TheGodsAreReal
 
             int pawnCount = Prefs.DevMode ? trackedPawns.Count : 0;
 
-            float calculatedHeight = (totalButtonCount * 35f) + (pawnCount * 30f) + 100f; // 100f for padding/headers
+            float calculatedHeight = (totalButtonCount * 35f) + (pawnCount * 30f) + 50f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
 
             Widgets.BeginScrollView(inRect, ref _scrollPos, viewRect);
 
             Listing_Standard listing = new Listing_Standard();
             listing.Begin(viewRect);
-            listing.Label($"The Gods Are Real {Version}", 24f);
+            listing.Label($"Version {Version}", 24f);
+            listing.Gap(12f);
 
+            listing.Label("General Settings", 24f);
+            listing.Gap(12f);
+            listing.CheckboxLabeled("Always show motes (May decrease performance)", ref AlwaysShowMotes);
+            listing.Gap(12f);
 
             if (Prefs.DevMode)
                 TheGodsAreRealDebugSettings.DoDebugSettingsWindowContents(listing, trackedPawns);
-
-            listing.Label("General Settings", 24f);
-            listing.CheckboxLabeled("Always show motes (May decrease performance)", ref AlwaysShowMotes);
 
             listing.End();
             Widgets.EndScrollView();
