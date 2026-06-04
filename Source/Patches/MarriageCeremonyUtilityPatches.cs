@@ -71,7 +71,7 @@ namespace TheGodsAreReal.Patches
                     if(pawn == firstPawn || pawn == secondPawn)
                         continue;
 
-                    if (pawn.IsColonist || pawn.IsSlave)
+                    if (pawn.IsColonist || pawn.IsSlaveOfColony)
                     {
                         float guestReward = weddingReward * 0.5f; // Guests gain half the favor of the married couple
 
