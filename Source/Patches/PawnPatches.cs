@@ -32,19 +32,21 @@ using Verse;
 
 namespace TheGodsAreReal.Patches
 {
+
+    // Pawn Death
+    [HarmonyPatch(typeof(Pawn), nameof(Pawn.Kill))]
+    public static class Patch_Pawn_Kill
+    {
+        public static void Postfix(Pawn __instance)
+        {
+            Find.World?.GetComponent<WorldComponent_FavorTracker>()?.Notify_PawnDied(__instance);
+        }
+    }
+
+    // Add a debug gizmo. NOTE: IT WILL ONLY SHOW IF THE PAWN'S IDEO HAS A DEITY!!!
     [HarmonyPatch(typeof(Pawn), nameof(Pawn.GetGizmos))]
     public static class Pawn_GetGizmos
     {
-        [HarmonyPatch(typeof(Pawn), nameof(Pawn.Kill))]
-        public static class Patch_Pawn_Kill
-        {
-            public static void Postfix(Pawn __instance)
-            {
-                Find.World.GetComponent<WorldComponent_FavorTracker>()?.Notify_PawnDied(__instance);
-            }
-        }
-
-
         public static IEnumerable<Gizmo> Postfix(IEnumerable<Gizmo> __result, Pawn __instance)
         {
             foreach (var gizmo in __result)
@@ -58,13 +60,6 @@ namespace TheGodsAreReal.Patches
             if (__instance == null || __instance.Ideo?.KeyDeityName == null)
                 yield break;
 
-            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
-            if (tracker == null)
-                yield break;
-
-            float individualFavor = tracker.GetFavor(__instance);
-            float ideoFavor = tracker.GetIdeoFavor(__instance.Ideo);
-
             yield return new Command_Action
             {
                 defaultLabel = "DEV: Check Favor",
@@ -72,6 +67,13 @@ namespace TheGodsAreReal.Patches
                 icon = TexCommand.DesirePower,
                 action = delegate
                 {
+                    var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
+                    if (tracker == null) 
+                        return;
+
+                    float individualFavor = tracker.GetFavor(__instance);
+                    float ideoFavor = tracker.GetIdeoFavor(__instance.Ideo);
+
                     Messages.Message($"[TheGodsAreReal] {__instance.LabelShort.ToUpper()}: -> Individual Favor: {individualFavor:F1} / 100.0 -> Ideo Avg Favor:   {ideoFavor:F1}", MessageTypeDefOf.NeutralEvent);
                     Log.Message($"========================================");
                     Log.Message($"[TheGodsAreReal] DEBUG FOR {__instance.LabelShort.ToUpper()}:");
