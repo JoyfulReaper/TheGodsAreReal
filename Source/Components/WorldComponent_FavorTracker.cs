@@ -197,7 +197,7 @@ namespace TheGodsAreReal
             if (pawn == null || !pawn.RaceProps.Humanlike)
                 return;
 
-            if (!pawn.IsColonist && !pawn.IsSlave)
+            if (!pawn.IsColonist && !pawn.IsSlaveOfColony)
                 return;
 
             if (pawn.Ideo == null)
@@ -218,7 +218,7 @@ namespace TheGodsAreReal
             }
             _pawnFavor[pawn] = Mathf.Clamp(_pawnFavor[pawn] + amount, -100f, 100f);
 
-            if ( (Mathf.Abs(amount) >= 0.5f && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes)
+            if (pawn.Map != null && ((Mathf.Abs(amount) >= 0.5f && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes))
             {
                 Color favorColor = (amount >= 0) ? Color.cyan : Color.red;
                 string text = (amount > 0) ? $"+{amount} Favor" : $"{amount} Favor";
@@ -319,24 +319,6 @@ namespace TheGodsAreReal
             }
 
             return pawnCount > 0 ? totalFavor / pawnCount : 0f;
-        }
-
-        /// <summary>
-        /// Determine if we should ignore a though when showing the motes to avoid huge mote clouds during mass events
-        /// </summary>
-        /// <param name="thought"></param>
-        /// <returns>true if the mote should be supressed, false otherwise</returns>
-        public bool ShouldSuppressThoughtMote(Thought_Memory thought)
-        {
-            // TODO: I don't think we should show motes here ever, so ignore any settings to turn them on
-
-            // Define what constitutes "Mass Event" thoughts that should silence motes
-            if (thought.def.defName.Contains("Party") || thought.def.defName.Contains("Ritual"))
-            {
-                return true;
-            }
-
-            return false;
         }
 
         /// <summary>
