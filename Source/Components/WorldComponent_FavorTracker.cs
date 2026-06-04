@@ -28,12 +28,10 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
-using System.Linq;
 using TheGodsAreReal.Handlers;
+using TheGodsAreReal.Utilities;
 using UnityEngine;
 using Verse;
-using TheGodsAreReal.Utilities;
-using Verse.Noise;
 
 namespace TheGodsAreReal
 {
@@ -42,29 +40,32 @@ namespace TheGodsAreReal
         // Core game dictionaries
         private Dictionary<Pawn, float> _pawnFavor = new Dictionary<Pawn, float>(); // Key: Pawn, Value: Favor score (-100.0 to 100.0) for key
         private Dictionary<Pawn, int> _lastFavorTick = new Dictionary<Pawn, int>(); // Key: Pawn, Value: Last game tick when favor was updated for key
-        private readonly List<Pawn> _tempPurgeList = new List<Pawn>();
 
         // Used by Scribe for saving/loading the dictionaries
-        private List<Pawn> _pawnFavorKeys;
-        private List<float> _pawnFavorValues;
-        private List<Pawn> _lastFavorTickKeys;
-        private List<int> _lastFavorTickValues;
+        private List<Pawn> _pawnFavorKeys = new List<Pawn>();
+        private List<float> _pawnFavorValues = new List<float>();
+        private List<Pawn> _lastFavorTickKeys = new List<Pawn>();
+        private List<int> _lastFavorTickValues = new List<int>();
 
         private bool _suppressAllMotes = false; // Not currently used
-        private float _minimumMoteThreshold = 0.5f;
-        private float _maxFavor = 100;
-        private float _minFavor = -100;
+        private const float MinimumMoteThreshold = 0.5f;
+        private const float MaxFavor = 100;
+        private const float MinFavor = -100;
 
         // Favor decay variables
         private const int _decayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
         private const float _passiveDecayAmount = 0.05f; // How much favor slips away per interval
+
+        // Dedicated zero-allocation operational buffers
+        private readonly List<Pawn> _tempFavorKeys = new List<Pawn>();
+        private readonly List<Pawn> _tempPurgeList = new List<Pawn>();
 
         // Hediff just used for testing right now
         private static readonly HediffDef _divineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
 
         private const int RareTickValue = 250; 
 
-        private TheGodsAreRealSettings Settings => LoadedModManager.GetMod<TheGodsAreRealMod>().GetSettings<TheGodsAreRealSettings>();
+        private TheGodsAreRealSettings Settings => TheGodsAreRealMod.Settings;
 
         public IReadOnlyDictionary<Pawn, float> PawnFavor => 
             _pawnFavor;
@@ -135,37 +136,47 @@ namespace TheGodsAreReal
             }
         }
 
+
         private void DecayPassiveFavor()
         {
             if (_pawnFavor.Count == 0)
                 return;
 
+            _tempFavorKeys.Clear();
             _tempPurgeList.Clear();
 
-            foreach (var kvp in _pawnFavor)
+            foreach (KeyValuePair<Pawn, float> kvp in _pawnFavor)
             {
-                Pawn pawn = kvp.Key;
+                _tempFavorKeys.Add(kvp.Key);
+            }
 
-                if (pawn == null || pawn.Destroyed || pawn.Dead)
+            for (int i = 0; i < _tempFavorKeys.Count; i++)
+            {
+                Pawn pawn = _tempFavorKeys[i];
+
+                if (pawn == null || pawn.Destroyed || pawn.Dead || !pawn.RaceProps.Humanlike)
                 {
                     _tempPurgeList.Add(pawn);
                     continue;
                 }
 
-                // Apply decay
-                float favor = kvp.Value;
+                float favor = _pawnFavor[pawn];
+
                 if (favor > 0f)
                     _pawnFavor[pawn] = Mathf.Max(0f, favor - _passiveDecayAmount);
                 else if (favor < 0f)
                     _pawnFavor[pawn] = Mathf.Min(0f, favor + _passiveDecayAmount);
             }
 
-            // Cleanup
+            // Execute purge
             for (int i = 0; i < _tempPurgeList.Count; i++)
             {
                 _pawnFavor.Remove(_tempPurgeList[i]);
                 _lastFavorTick.Remove(_tempPurgeList[i]);
             }
+
+            _tempFavorKeys.Clear();
+            _tempPurgeList.Clear();
 
             if (Prefs.DevMode)
             {
@@ -200,9 +211,9 @@ namespace TheGodsAreReal
                 return;
 
             _pawnFavor.TryGetValue(pawn, out float currentFavor);
-            _pawnFavor[pawn] = Mathf.Clamp(currentFavor + amount, _minFavor, _maxFavor);
+            _pawnFavor[pawn] = Mathf.Clamp(currentFavor + amount, MinFavor, MaxFavor);
 
-            if (pawn.Map != null && ((Mathf.Abs(amount) >= _minimumMoteThreshold && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes))
+            if (pawn.Spawned && ((Mathf.Abs(amount) >= MinimumMoteThreshold && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes))
             {
                 Color favorColor = (amount >= 0) ? Color.cyan : Color.red;
                 string text = (amount > 0) ? $"+{amount} Favor" : $"{amount} Favor";
