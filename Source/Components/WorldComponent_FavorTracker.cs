@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using RimWorld;
 using RimWorld.Planet;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 using Verse;
 
@@ -116,7 +117,8 @@ namespace TheGodsAreReal
 
         private void DecayPassiveFavor()
         {
-            if (_pawnFavor.Count == 0) return;
+            if (_pawnFavor.Count == 0) 
+                return;
 
             Dictionary<int, Pawn> pawnCache = new Dictionary<int, Pawn>();
 
@@ -138,13 +140,13 @@ namespace TheGodsAreReal
                 pawnCache[worldPawns[i].thingIDNumber] = worldPawns[i];
             }
 
+            List<int> currentIds = _pawnFavor.Keys.ToList();
             List<int> idsToPurge = new List<int>();
 
-            foreach (var kvp in _pawnFavor)
+            for (int i = 0; i < currentIds.Count; i++)
             {
-                int id = kvp.Key;
+                int id = currentIds[i];
 
-                // O(1) lookup in our pre-built cache
                 pawnCache.TryGetValue(id, out Pawn pawn);
 
                 if (pawn == null || pawn.Destroyed || pawn.Dead)
@@ -154,7 +156,7 @@ namespace TheGodsAreReal
                 }
 
                 // Apply decay
-                float favor = kvp.Value;
+                float favor = _pawnFavor[id]; // Use the ID to access
                 if (favor > 0f)
                     _pawnFavor[id] = Mathf.Max(0f, favor - _passiveDecayAmount);
                 else if (favor < 0f)
