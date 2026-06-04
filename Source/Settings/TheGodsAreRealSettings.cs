@@ -36,22 +36,22 @@ namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
-        private string _version = "0.0.12";
+        private string _version = "0.0.13";
+        private bool _alwaysShowMotes = false;
         private static Vector2 _scrollPos = Vector2.zero;
-        private static int buttonCount = 0;
-        internal bool AlwaysShowMotes = false;
+        private const int _buttonCount = 0;
 
-        public string Version
+        public bool AlwaysShowMotes
         {
-            get
-            {
-                return _version;
-            }
+            get => _alwaysShowMotes;
+            private set => _alwaysShowMotes = value;
         }
+
+        public string Version => _version;
 
         public void DoSettingsWindowContents(Rect inRect)
         {
-            int totalButtonCount = Prefs.DevMode ? TheGodsAreRealDebugSettings.debugButtonCount + buttonCount: buttonCount;
+            int totalButtonCount = Prefs.DevMode ? TheGodsAreRealDebugSettings.DebugButtonCount + _buttonCount : _buttonCount;
             var trackedPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
                            .Where(p => p.RaceProps.Humanlike).ToList();
 
@@ -69,7 +69,7 @@ namespace TheGodsAreReal
 
             listing.Label("General Settings", 24f);
             listing.Gap(12f);
-            listing.CheckboxLabeled("Always show motes (May decrease performance)", ref AlwaysShowMotes);
+            listing.CheckboxLabeled("Always show motes (May decrease performance)", ref _alwaysShowMotes);
             listing.Gap(12f);
 
             if (Prefs.DevMode)
@@ -82,8 +82,8 @@ namespace TheGodsAreReal
         public override void ExposeData()
         {
             base.ExposeData();
-            Scribe_Values.Look(ref _version, "Version", _version);
-            Scribe_Values.Look(ref AlwaysShowMotes, "AlwaysShowMotes", false);
+            Scribe_Values.Look(ref _version, "Version", Version);
+            Scribe_Values.Look(ref _alwaysShowMotes, "AlwaysShowMotes", false);
         }
     }
 }
