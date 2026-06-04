@@ -28,15 +28,15 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using RimWorld;
 using UnityEngine;
 using Verse;
-using Verse.AI;
 using System.Linq;
 using TheGodsAreReal.Settings;
+using System.Collections.Generic;
 
 namespace TheGodsAreReal
 {
     public class TheGodsAreRealSettings : ModSettings
     {
-        private string _version = "0.0.14";
+        private string _version = "0.0.15";
         private bool _alwaysShowMotes = false;
         private static Vector2 _scrollPos = Vector2.zero;
         private const int _buttonCount = 0;
@@ -51,11 +51,16 @@ namespace TheGodsAreReal
 
         public void DoSettingsWindowContents(Rect inRect)
         {
+            List<Pawn> trackedPawns = null;
             int totalButtonCount = Prefs.DevMode ? TheGodsAreRealDebugSettings.DebugButtonCount + _buttonCount : _buttonCount;
-            var trackedPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
-                           .Where(p => p.RaceProps.Humanlike).ToList();
 
-            int pawnCount = Prefs.DevMode ? trackedPawns.Count : 0;
+            if (Prefs.DevMode)
+            {
+                trackedPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction
+                               .Where(p => p.RaceProps.Humanlike).ToList();
+            }
+
+            int pawnCount = (Prefs.DevMode && trackedPawns != null) ? trackedPawns.Count : 0;
 
             float calculatedHeight = (totalButtonCount * 35f) + (pawnCount * 30f) + 50f;
             Rect viewRect = new Rect(0f, 0f, inRect.width - 20f, calculatedHeight);
