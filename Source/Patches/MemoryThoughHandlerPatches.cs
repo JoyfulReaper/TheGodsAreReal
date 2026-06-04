@@ -50,12 +50,15 @@ namespace TheGodsAreReal.Patches
             if (pawn.Ideo?.KeyDeityName == null)
                 return;
 
+            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
+            if (tracker == null)
+                return;
+
             int tick = Find.TickManager.TicksGame;
             
 
             if (newThought.sourcePrecept != null)
             {
-                var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
 
                 if (tracker != null && tracker.GetLastFavorTick(pawn) == tick)
                     return;

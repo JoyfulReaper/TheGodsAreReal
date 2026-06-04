@@ -251,7 +251,13 @@ namespace TheGodsAreReal
 
         public int GetLastFavorTick(Pawn pawn)
         {
-            return _lastFavorTick.TryGetValue(pawn.thingIDNumber, out int tick) ? tick : -1;
+            if (pawn == null) return -1;
+
+            int id = pawn.thingIDNumber;
+            if (id == -1)
+                return -1;
+
+            return _lastFavorTick.TryGetValue(id, out int tick) ? tick : -1;
         }
 
         public bool PawnWorships(Pawn pawn, PreceptDef godPrecept)
