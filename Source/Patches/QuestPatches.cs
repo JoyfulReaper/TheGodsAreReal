@@ -28,6 +28,7 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 using HarmonyLib;
 using RimWorld;
 using System.Linq;
+using TheGodsAreReal.Utilities;
 using UnityEngine;
 using Verse;
 
@@ -63,12 +64,12 @@ namespace TheGodsAreReal.Patches
             Ideo questIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
             Pawn accepter = __instance.AccepterPawn;
 
-            var colonyPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
+            var colonyPawns = GodsAreRealPawnUtility.GetAllColonyPawnsExceptPrisoners();
             bool showMotes = colonyPawns.Count <= DisableMotesThreshold;
 
             foreach (Pawn p in colonyPawns)
             {
-                if (!p.RaceProps.Humanlike)
+                if (!p.RaceProps.Humanlike || p.Dead)
                     continue;
 
                 if (p == accepter)
