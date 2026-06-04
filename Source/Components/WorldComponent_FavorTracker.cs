@@ -321,7 +321,10 @@ namespace TheGodsAreReal
             // Loading
             if (Scribe.mode == LoadSaveMode.LoadingVars && _pawnFavor == null)
             {
-                _pawnFavor = new Dictionary<int, float>();
+                if (_pawnFavor == null) 
+                    _pawnFavor = new Dictionary<int, float>();
+                if (_lastFavorTick == null) 
+                    _lastFavorTick = new Dictionary<int, int>();
             }
 
             // Saving
