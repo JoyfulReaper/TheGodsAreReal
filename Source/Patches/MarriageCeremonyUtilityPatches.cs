@@ -36,6 +36,14 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(MarriageCeremonyUtility), nameof(MarriageCeremonyUtility.Married))]
     public static class MarriageCeremonyUtility_Married
     {
+        private const float BaseWeddingReward = 25f;
+        private const int DisableMotesThreshold = 10;
+        private const float InterFaithPenalityMultiplier = 0.5f;
+        private const float GuestRewardMultiplier = 0.5f;
+        private const float NonBeliverRewardChance = 0.5f;
+        private const float NonBeliverPosRewardMultipler = 0.5f;
+        private const float NonBeliverFavorLoss = 3f;
+
         static void Postfix(Pawn firstPawn, Pawn secondPawn)
         {
             if(firstPawn == null || secondPawn == null)
@@ -45,11 +53,10 @@ namespace TheGodsAreReal.Patches
             if (favorTracker == null) 
                 return;
 
-            float weddingReward = 25f;
-
+            float weddingReward = BaseWeddingReward;
             if (firstPawn.Ideo != null && secondPawn.Ideo != null && firstPawn.Ideo != secondPawn.Ideo)
             {
-                weddingReward *= 0.5f; // Reduce reward if spouses have different ideologies
+                weddingReward *= InterFaithPenalityMultiplier; // Reduce reward if spouses have different ideologies
             }
 
             favorTracker.AddFavor(firstPawn, weddingReward);
@@ -61,7 +68,7 @@ namespace TheGodsAreReal.Patches
             Lord lord = firstPawn.GetLord();
             if(lord != null)
             {
-                if(lord.ownedPawns.Count > 10)
+                if(lord.ownedPawns.Count > DisableMotesThreshold)
                 {
                     showMotes = false;
                 }
@@ -73,18 +80,18 @@ namespace TheGodsAreReal.Patches
 
                     if (pawn.IsColonist || pawn.IsSlaveOfColony)
                     {
-                        float guestReward = weddingReward * 0.5f; // Guests gain half the favor of the married couple
+                        float guestReward = weddingReward * GuestRewardMultiplier; // Guests gain half the favor of the married couple
 
                         // Pawn doesnt follow ideo of either spouse
                         if (pawn.Ideo != null && (pawn.Ideo != firstPawn.Ideo && pawn.Ideo != secondPawn.Ideo))
                         {
-                            if(Rand.Value < 0.5f)
+                            if(Rand.Value < NonBeliverRewardChance)
                             {
-                                guestReward *= 0.5f;
+                                guestReward *= NonBeliverPosRewardMultipler;
                             }
                             else
                             {
-                                guestReward -= 3f;
+                                guestReward -= NonBeliverFavorLoss;
                             }
                         }
                         favorTracker.AddFavor(pawn, guestReward, showMotes);
