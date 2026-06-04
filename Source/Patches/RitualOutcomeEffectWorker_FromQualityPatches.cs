@@ -100,17 +100,12 @@ namespace TheGodsAreReal.Patches
             // Grab the leader/organizer of the ritual if available to give them a bonus/penalty
             Pawn organizer = jobRitual?.Organizer;
 
-            bool showMotes = true;
-
-            if(totalPresence.Count >= DisableMotesThreshold)
-            {
-                showMotes = false;
-            }
+            bool showMotes = totalPresence.Count < DisableMotesThreshold;
 
             foreach (var kvp in totalPresence)
             {
                 Pawn participant = kvp.Key;
-                if (participant == null)
+                if (participant == null || !participant.RaceProps.Humanlike)
                     continue;
 
                 float individualFavorChange = favorChange;
