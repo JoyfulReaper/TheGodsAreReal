@@ -34,6 +34,9 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(MemoryThoughtHandler), nameof(MemoryThoughtHandler.TryGainMemory), new System.Type[] { typeof(Thought_Memory), typeof(Pawn) })]
     public static class MemoryThoughtHandler_TryGainMemory
     {
+        private const float NegativeMultiplier = 0.5f;
+        private const float PositiveMultiplier = 0.75f;
+
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
             if (newThought == null || __instance.pawn == null || newThought.pawn == null)
@@ -65,20 +68,18 @@ namespace TheGodsAreReal.Patches
                 float moodOffset = newThought.MoodOffset();
                 if (moodOffset < 0f)
                 {
-                    float negativeMultiplier = 0.5f;
-                    tracker.AddFavor(pawn, moodOffset * negativeMultiplier, shouldShowMotes);
+                    tracker.AddFavor(pawn, moodOffset * NegativeMultiplier, shouldShowMotes);
                     if (Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * negativeMultiplier}");
+                        Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * NegativeMultiplier}");
                     }
                 }
                 else if (moodOffset > 0f)
                 {
-                    float positiveMultiplier = 0.75f;
-                    tracker.AddFavor(pawn, moodOffset * positiveMultiplier, shouldShowMotes);
+                    tracker.AddFavor(pawn, moodOffset * PositiveMultiplier, shouldShowMotes);
                     if (Prefs.DevMode)
                     {
-                        Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * positiveMultiplier}");
+                        Log.Message($"[TheGodsAreReal]: Thought '{newThought.def.defName}' caused {pawn.LabelShort}'s favor to change by: {moodOffset * PositiveMultiplier}");
                     }
                 }
             }
