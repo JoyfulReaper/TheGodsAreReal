@@ -53,8 +53,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Handlers\ConversionHandler.cs" />
     <Compile Include="Handlers\PawnDeathHandler.cs" />
     <Compile Include="Patches\BuildingPatches.cs" />
+    <Compile Include="Patches\CompAbilityEffect_ConvertPatches.cs" />
     <Compile Include="Patches\InteractionWorker_ConvertIdeoAttemptPatches.cs" />
     <Compile Include="Patches\JobDriver_Meditate_MeditationTickPatches.cs" />
     <Compile Include="Patches\MarriageCeremonyUtilityPatches.cs" />

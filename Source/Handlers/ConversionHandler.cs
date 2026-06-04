@@ -25,19 +25,40 @@ OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  **/
 
-using HarmonyLib;
-using RimWorld;
-using TheGodsAreReal.Handlers;
 using Verse;
 
-namespace TheGodsAreReal.Patches
+namespace TheGodsAreReal.Handlers
 {
-    [HarmonyPatch(typeof(InteractionWorker_ConvertIdeoAttempt), nameof(InteractionWorker_ConvertIdeoAttempt.Interacted))]
-    public static class Patch_InteractionWorker_ConvertIdeoAttempt_Interacted
+    public static class ConversionHandler
     {
-        public static void Postfix(Pawn initiator, Pawn recipient)
+        public static void HandleConversionFavor(Pawn initiator, Pawn recipient, string logContext)
         {
-            ConversionHandler.HandleConversionFavor(initiator, recipient, "Social Conversion Attempt");
+            if (initiator == null || recipient == null)
+                return;
+
+            if (!initiator.RaceProps.Humanlike || !recipient.RaceProps.Humanlike)
+                return;
+
+            var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
+            if (tracker == null)
+                return;
+
+            // Reward the converter
+            if (initiator.IsColonist || initiator.IsSlave)
+            {
+                tracker.AddFavor(initiator, 2f, showMote: true);
+            }
+
+            // Punish the convertee
+            if (recipient.IsColonist || recipient.IsSlave)
+            {
+                tracker.AddFavor(recipient, -1f, showMote: true);
+            }
+
+            if (Prefs.DevMode)
+            {
+                Log.Message($"[TheGodsAreReal] {logContext}: {initiator.LabelShort} handled conversion mechanics for {recipient.LabelShort}.");
+            }
         }
     }
 }
