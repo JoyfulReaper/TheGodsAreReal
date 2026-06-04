@@ -30,12 +30,23 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(CompAbilityEffect_Convert), nameof(CompAbilityEffect_Convert.Apply))]
     public static class Patch_CompAbilityEffect_Convert_Apply
     {
-        public static void Postfix(CompAbilityEffect_Convert __instance, LocalTargetInfo target, LocalTargetInfo dest)
+        public static void Prefix(LocalTargetInfo target, out Ideo __state)
+        {
+            __state = target.Pawn?.Ideo;
+        }
+
+        public static void Postfix(CompAbilityEffect_Convert __instance, LocalTargetInfo target, Ideo __state)
         {
             Pawn initiator = __instance.parent?.pawn;
             Pawn recipient = target.Pawn;
 
-            ConversionHandler.HandleConversionFavor(initiator, recipient, "Ability Conversion");
+            if (recipient == null)
+                return;
+
+            // Success condition: They have an ideology, and it shifted away from their starting state
+            bool wasSuccessful = recipient.Ideo != null && recipient.Ideo != __state;
+
+            ConversionHandler.HandleConversionFavor(initiator, recipient, wasSuccessful, "Ability Conversion");
         }
     }
 }

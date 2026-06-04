@@ -35,9 +35,19 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(InteractionWorker_ConvertIdeoAttempt), nameof(InteractionWorker_ConvertIdeoAttempt.Interacted))]
     public static class Patch_InteractionWorker_ConvertIdeoAttempt_Interacted
     {
-        public static void Postfix(Pawn initiator, Pawn recipient)
+        public static void Prefix(Pawn recipient, out Ideo __state)
         {
-            ConversionHandler.HandleConversionFavor(initiator, recipient, "Social Conversion Attempt");
+            __state = recipient?.Ideo;
+        }
+
+        public static void Postfix(Pawn initiator, Pawn recipient, Ideo __state)
+        {
+            if (recipient == null)
+                return;
+
+            bool wasSuccessful = recipient.Ideo != null && recipient.Ideo != __state;
+
+            ConversionHandler.HandleConversionFavor(initiator, recipient, wasSuccessful, "Social Conversion Attempt");
         }
     }
 }

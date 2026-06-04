@@ -31,7 +31,7 @@ namespace TheGodsAreReal.Handlers
 {
     public static class ConversionHandler
     {
-        public static void HandleConversionFavor(Pawn initiator, Pawn recipient, string logContext)
+        public static void HandleConversionFavor(Pawn initiator, Pawn recipient, bool wasSuccessful,string logContext)
         {
             if (initiator == null || recipient == null)
                 return;
@@ -43,21 +43,30 @@ namespace TheGodsAreReal.Handlers
             if (tracker == null)
                 return;
 
+            float converterReward = 2f;
+            float converteePenalty = -1f;
+
+            if (wasSuccessful)
+            {
+                converterReward = 10f;
+            }
+
             // Reward the converter
             if (initiator.IsColonist || initiator.IsSlave)
             {
-                tracker.AddFavor(initiator, 2f, showMote: true);
+                tracker.AddFavor(initiator, converterReward, showMote: true);
             }
 
             // Punish the convertee
             if (recipient.IsColonist || recipient.IsSlave)
             {
-                tracker.AddFavor(recipient, -1f, showMote: true);
+                tracker.AddFavor(recipient, converteePenalty, showMote: true);
             }
 
             if (Prefs.DevMode)
             {
-                Log.Message($"[TheGodsAreReal] {logContext}: {initiator.LabelShort} handled conversion mechanics for {recipient.LabelShort}.");
+                string status = wasSuccessful ? "SUCCESS" : "FAILED";
+                Log.Message($"[TheGodsAreReal] {logContext} [{status}]: {initiator.LabelShort} (+{converterReward}) preached to {recipient.LabelShort}.");
             }
         }
     }
