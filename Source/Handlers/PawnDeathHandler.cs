@@ -9,11 +9,6 @@ namespace TheGodsAreReal.Handlers
     {
         public static void HandlePawnDeath(Pawn pawn, float favor)
         {
-            if (Prefs.DevMode)
-            {
-                Log.Message($"[TheGodsAreReal] Processing death of {pawn.LabelShort}. Favor was {favor}.");
-            }
-
             if (pawn == null || !pawn.RaceProps.Humanlike)
                 return;
 
@@ -23,6 +18,11 @@ namespace TheGodsAreReal.Handlers
             var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
             if (tracker == null)
                 return;
+
+            if (Prefs.DevMode)
+            {
+                Log.Message($"[TheGodsAreReal] Processing death of {pawn.LabelShort}. Favor was {favor}.");
+            }
 
             if (favor <= -75f)
             {
