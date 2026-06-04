@@ -36,10 +36,10 @@ namespace TheGodsAreReal.Patches
     {
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
-            Pawn pawn = __instance.pawn;
-
-            if (newThought == null || pawn == null)
+            if (newThought == null || __instance.pawn == null || newThought.pawn == null)
                 return;
+
+            Pawn pawn = __instance.pawn;
 
             if (pawn.thingIDNumber == -1)
                 return;
