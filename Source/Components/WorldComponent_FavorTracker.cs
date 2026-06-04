@@ -74,7 +74,6 @@ namespace TheGodsAreReal
                 DecayPassiveFavor();
             }
 
-
             // Rare Tick //
             if (Find.TickManager.TicksGame % 250 != 0)
                 return;
@@ -264,6 +263,11 @@ namespace TheGodsAreReal
             }
         }
 
+        /// <summary>
+        /// Get the tick of the last favor change for a pawn
+        /// </summary>
+        /// <param name="pawn">Target Pawn</param>
+        /// <returns>Last tick favor changed</returns>
         public int GetLastFavorTick(Pawn pawn)
         {
             if (_lastFavorTick == null)
@@ -317,6 +321,11 @@ namespace TheGodsAreReal
             return pawnCount > 0 ? totalFavor / pawnCount : 0f;
         }
 
+        /// <summary>
+        /// Determine if we should ignore a though when showing the motes to avoid huge mote clouds during mass events
+        /// </summary>
+        /// <param name="thought"></param>
+        /// <returns>true if the mote should be supressed, false otherwise</returns>
         public bool ShouldSuppressThoughtMote(Thought_Memory thought)
         {
             // TODO: I don't think we should show motes here ever, so ignore any settings to turn them on
@@ -330,12 +339,19 @@ namespace TheGodsAreReal
             return false;
         }
 
+        /// <summary>
+        /// Clears the favor dictionay
+        /// </summary>
         public void ClearAllPawnFavor()
         {
             _pawnFavor.Clear();
             Log.Warning("!!![TheGodsAreReal] All favor data DELETED!!!");
         }
 
+        /// <summary>
+        /// Run the pawn death handler for the given pawn
+        /// </summary>
+        /// <param name="pawn">The pawn that died</param>
         public void Notify_PawnDied(Pawn pawn)
         {
             float favor = GetFavor(pawn);
