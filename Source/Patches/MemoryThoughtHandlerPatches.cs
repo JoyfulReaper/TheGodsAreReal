@@ -32,7 +32,7 @@ using Verse;
 namespace TheGodsAreReal.Patches
 {
     [HarmonyPatch(typeof(MemoryThoughtHandler), nameof(MemoryThoughtHandler.TryGainMemory), new System.Type[] { typeof(Thought_Memory), typeof(Pawn) })]
-    public static class MemoryThoughHandler_TryGainMemory
+    public static class MemoryThoughtHandler_TryGainMemory
     {
         public static void Postfix(MemoryThoughtHandler __instance, Thought_Memory newThought)
         {
@@ -41,10 +41,10 @@ namespace TheGodsAreReal.Patches
 
             Pawn pawn = __instance.pawn;
 
-            if (pawn.thingIDNumber == -1)
+            if (!pawn.IsColonist && !pawn.IsSlaveOfColony)
                 return;
 
-            if (pawn.Dead || !pawn.Spawned)
+            if (pawn.Dead)
                 return;
 
             if (pawn.Ideo?.KeyDeityName == null)
@@ -53,17 +53,14 @@ namespace TheGodsAreReal.Patches
             var tracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
             if (tracker == null)
                 return;
-
-            int tick = Find.TickManager.TicksGame;
             
-
             if (newThought.sourcePrecept != null)
             {
-
-                if (tracker != null && tracker.GetLastFavorTick(pawn) == tick)
+                int tick = Find.TickManager.TicksGame;
+                if (tracker.GetLastFavorTick(pawn) == tick)
                     return;
 
-                bool shouldShowMotes = !tracker.ShouldSuppressThoughtMote(newThought);
+                bool shouldShowMotes = !ShouldSuppressThoughtMote(newThought); // These motes are ALWAYS supppressed even if show all motes are turned on
 
                 float moodOffset = newThought.MoodOffset();
                 if (moodOffset < 0f)
@@ -85,6 +82,31 @@ namespace TheGodsAreReal.Patches
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Determine if we should ignore a though when showing the motes to avoid huge mote clouds during mass events
+        /// </summary>
+        /// <param name="thought"></param>
+        /// <returns>true if the mote should be supressed, false otherwise</returns>
+        internal static bool ShouldSuppressThoughtMote(Thought_Memory thought)
+        {
+            string defName = thought.def?.defName;
+            if (string.IsNullOrEmpty(defName))
+                return false;
+
+            // Blacklist filters for collective crowd events where multiple pawns react simultaneously
+            string[] massEventKeywords = { "Party", "Ritual", "Speech", "Funeral", "Execution", "Sacrifice", "Festival" };
+
+            foreach (string keyword in massEventKeywords)
+            {
+                if (defName.Contains(keyword))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
     }
 }

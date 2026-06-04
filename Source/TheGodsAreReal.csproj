@@ -60,7 +60,7 @@
     <Compile Include="Patches\InteractionWorker_ConvertIdeoAttemptPatches.cs" />
     <Compile Include="Patches\JobDriver_Meditate_MeditationTickPatches.cs" />
     <Compile Include="Patches\MarriageCeremonyUtilityPatches.cs" />
-    <Compile Include="Patches\MemoryThoughHandlerPatches.cs" />
+    <Compile Include="Patches\MemoryThoughtHandlerPatches.cs" />
     <Compile Include="Patches\MentalStatePatches.cs" />
     <Compile Include="Patches\PawnIdeoTrackerPatches.cs" />
     <Compile Include="Patches\QuestPatches.cs" />
