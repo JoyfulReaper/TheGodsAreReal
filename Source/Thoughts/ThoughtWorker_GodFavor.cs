@@ -32,6 +32,17 @@ namespace TheGodsAreReal
 {
     public class ThoughtWorker_GodFavor : ThoughtWorker
     {
+        // Thresholds
+        private const float DevineWrathThreshold = -75f;
+        private const float DivineGraceThreshold = 80f;
+        private const float AlignedColonyThreshold = 70f;
+        private const float MisalignedColonyThreshold = -25f;
+
+        // Thought Stages
+        private const int DivineGraceStage = 0;
+        private const int SorrowOfTheFaithfulStage = 1;
+        private const int DivineWrathStage = 2;
+
         protected override ThoughtState CurrentStateInternal(Pawn p)
         {
             if (p.Ideo == null || p.Ideo.KeyDeityName == null)
@@ -44,27 +55,27 @@ namespace TheGodsAreReal
             float individualFavor = tracker.GetFavor(p);
             float ideoFavor = tracker.GetIdeoFavor(p.Ideo);
 
-            if (individualFavor < -75f)
+            if (individualFavor < DevineWrathThreshold)
             {
-                return ThoughtState.ActiveAtStage(2); // "Divine Wrath" (Severe -Mood)
+                return ThoughtState.ActiveAtStage(DivineWrathStage); // "Divine Wrath" (Severe -Mood)
             }
 
-            if (individualFavor > 80f)
+            if (individualFavor > DivineGraceThreshold)
             {
                 // The colony is also highly aligned!
-                if (ideoFavor > 70f)
+                if (ideoFavor > AlignedColonyThreshold)
                 {
-                    return ThoughtState.ActiveAtStage(0); // "Divine Grace" (+Mood)
+                    return ThoughtState.ActiveAtStage(DivineGraceStage); // "Divine Grace" (+Mood)
                 }
 
                 // The colony is dragging the god's name down
-                if (ideoFavor < -25f)
+                if (ideoFavor < MisalignedColonyThreshold)
                 {
-                    return ThoughtState.ActiveAtStage(1); // "Sorrow of the Faithful" (Minor -Mood)
+                    return ThoughtState.ActiveAtStage(SorrowOfTheFaithfulStage); // "Sorrow of the Faithful" (Minor -Mood)
                 }
 
                 // Fallback: The colony is just average, but the pawn is still personally blessed
-                return ThoughtState.ActiveAtStage(0);
+                return ThoughtState.ActiveAtStage(DivineWrathStage);
             }
 
             return ThoughtState.Inactive;
