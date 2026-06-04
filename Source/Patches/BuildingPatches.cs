@@ -3,6 +3,7 @@ using HarmonyLib;
 using RimWorld;
 using System.Diagnostics;
 using System.Linq;
+using TheGodsAreReal.Utilities;
 using Verse;
 
 namespace TheGodsAreReal.Patches
@@ -10,16 +11,29 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(Building), nameof(Building.Destroy))]
     public static class Building_Destroy
     {
-        static void Postfix(Building __instance)
+        private const int DisableMotesThreshold = 10;
+
+        private const float BaseFavorReward = 20f;
+        private const float HighFavorPenaltyThreshold = 70f;
+        private const float HighFavorPenaltyMultiplier = 0.6f;
+
+        private const float NonBeliverFavorChangeChance = 0.5f;
+        private const float NonBeliverPosFavorChangeAmount = 2f;
+        private const float NonBeliverNegFavorChangeAmount = -2f;
+
+        static void Postfix(Building __instance, DestroyMode mode)
         {
-            if (__instance.Map == null || !IsDivineThreat(__instance.def))
+            if (mode != DestroyMode.KillFinalize && mode != DestroyMode.Deconstruct) 
+                return;
+
+            var map = __instance.Map;
+            if (map == null || !IsDivineThreat(__instance.def))
                 return;
 
             var favorTracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker == null)
                 return;
 
-            float baseReward = 20.0f;
             if(Faction.OfPlayer.ideos == null || Faction.OfPlayer.ideos.PrimaryIdeo == null)
             {
                 Log.Warning("[TheGodsAreReal: Building_Destroy] Player faction has no ideology or primary ideology. No favor will be granted.");
@@ -27,25 +41,25 @@ namespace TheGodsAreReal.Patches
             }
 
             Ideo primaryIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
-            var validPawns = __instance.Map.mapPawns.AllPawnsSpawned.Where(p => (p.IsColonist || p.IsSlaveOfColony) && p.RaceProps.Humanlike);
+            var validPawns = GodsAreRealPawnUtility.GetAllColonyPawnsOnMap(map);
 
             var showMotes = true;
-            if (validPawns.Count() > 10)
+            if (validPawns.Count > DisableMotesThreshold)
             {
                 showMotes = false;
             }
 
             foreach (var pawn in validPawns)
             {
-                float indvidualReward = baseReward;
+                float indvidualReward = BaseFavorReward;
                 string pawnDesc = pawn.LabelShort;
 
-                if (pawn.Ideo == primaryIdeo)
+                if (pawn.Ideo != null && pawn.Ideo == primaryIdeo)
                 {
                     var currentFavor = favorTracker.GetFavor(pawn);
-                    if (currentFavor > 70f)
+                    if (currentFavor > HighFavorPenaltyThreshold)
                     {
-                        indvidualReward *= 0.6f;
+                        indvidualReward *= HighFavorPenaltyMultiplier;
                     }
 
                     favorTracker.AddFavor(pawn, indvidualReward, showMotes);
@@ -53,13 +67,13 @@ namespace TheGodsAreReal.Patches
                 else
                 {
                     pawnDesc += " (non-beleiver)";
-                    if (Rand.Value < 0.5f)
+                    if (Rand.Value < NonBeliverFavorChangeChance)
                     {
-                        indvidualReward = -2f;
+                        indvidualReward = NonBeliverPosFavorChangeAmount;
                     }
                     else
                     {
-                        indvidualReward = 2f;
+                        indvidualReward = NonBeliverNegFavorChangeAmount;
                     }
 
                     favorTracker.AddFavor(pawn, indvidualReward, showMotes);
@@ -88,6 +102,7 @@ namespace TheGodsAreReal.Patches
             if (def.isMechClusterThreat)
                 return true;
 
+            // TODO Find a bettter way to do this
             if (def.defName.Contains("ShipPart") || def.defName.Contains("MechCluster"))
             {
                 Log.Warning($"[TheGodsAreReal]: Identified threat ({def.defName}) by defName.Contains(), please verify.");
