@@ -42,6 +42,7 @@ namespace TheGodsAreReal
         // Core game dictionaries
         private Dictionary<Pawn, float> _pawnFavor = new Dictionary<Pawn, float>(); // Key: Pawn, Value: Favor score (-100.0 to 100.0) for key
         private Dictionary<Pawn, int> _lastFavorTick = new Dictionary<Pawn, int>(); // Key: Pawn, Value: Last game tick when favor was updated for key
+        private readonly List<Pawn> _tempPurgeList = new List<Pawn>();
 
         // Used by Scribe for saving/loading the dictionaries
         private List<Pawn> _pawnFavorKeys;
@@ -50,6 +51,9 @@ namespace TheGodsAreReal
         private List<int> _lastFavorTickValues;
 
         private bool _suppressAllMotes = false; // Not currently used
+        private float _minimumMoteThreshold = 0.5f;
+        private float _maxFavor = 100;
+        private float _minFavor = -100;
 
         // Favor decay variables
         private const int _decayIntervalTicks = 2500; // Run once every 2,500 ticks (approx. 1 game hour)
@@ -133,25 +137,23 @@ namespace TheGodsAreReal
 
         private void DecayPassiveFavor()
         {
-            if (_pawnFavor.Count == 0) 
+            if (_pawnFavor.Count == 0)
                 return;
 
-            List<Pawn> keys = _pawnFavor.Keys.ToList();
-            List<Pawn> toPurge = new List<Pawn>();
+            _tempPurgeList.Clear();
 
-            for (int i = 0; i < keys.Count; i++)
+            foreach (var kvp in _pawnFavor)
             {
-                Pawn pawn = keys[i];
-
+                Pawn pawn = kvp.Key;
 
                 if (pawn == null || pawn.Destroyed || pawn.Dead)
                 {
-                    toPurge.Add(pawn);
+                    _tempPurgeList.Add(pawn);
                     continue;
                 }
 
                 // Apply decay
-                float favor = _pawnFavor[pawn];
+                float favor = kvp.Value;
                 if (favor > 0f)
                     _pawnFavor[pawn] = Mathf.Max(0f, favor - _passiveDecayAmount);
                 else if (favor < 0f)
@@ -159,10 +161,10 @@ namespace TheGodsAreReal
             }
 
             // Cleanup
-            for (int i = 0; i < toPurge.Count; i++)
+            for (int i = 0; i < _tempPurgeList.Count; i++)
             {
-                _pawnFavor.Remove(toPurge[i]);
-                _lastFavorTick.Remove(toPurge[i]);
+                _pawnFavor.Remove(_tempPurgeList[i]);
+                _lastFavorTick.Remove(_tempPurgeList[i]);
             }
 
             if (Prefs.DevMode)
@@ -197,13 +199,10 @@ namespace TheGodsAreReal
             if (_lastFavorTick.TryGetValue(pawn, out int lastTick) && tick == lastTick)
                 return;
 
-            if (!_pawnFavor.ContainsKey(pawn))
-            {
-                _pawnFavor[pawn] = 0f;
-            }
-            _pawnFavor[pawn] = Mathf.Clamp(_pawnFavor[pawn] + amount, -100f, 100f);
+            _pawnFavor.TryGetValue(pawn, out float currentFavor);
+            _pawnFavor[pawn] = Mathf.Clamp(currentFavor + amount, _minFavor, _maxFavor);
 
-            if (pawn.Map != null && ((Mathf.Abs(amount) >= 0.5f && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes))
+            if (pawn.Map != null && ((Mathf.Abs(amount) >= _minimumMoteThreshold && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes))
             {
                 Color favorColor = (amount >= 0) ? Color.cyan : Color.red;
                 string text = (amount > 0) ? $"+{amount} Favor" : $"{amount} Favor";
@@ -237,12 +236,10 @@ namespace TheGodsAreReal
             if (pawn == null)
                 return;
 
-            if(_pawnFavor.ContainsKey(pawn))
-            {
+            if (_pawnFavor.ContainsKey(pawn))
                 _pawnFavor[pawn] = newValue;
-            }
 
-            if(Prefs.DevMode)
+            if (Prefs.DevMode)
             {
                 Log.Message($"[TheGodsAreReal] Reset favor for {pawn.LabelShort} due to ideology change.");
             }
@@ -255,14 +252,6 @@ namespace TheGodsAreReal
         /// <returns>Last tick favor changed</returns>
         public int GetLastFavorTick(Pawn pawn)
         {
-            if (_lastFavorTick == null)
-            {
-                _lastFavorTick = new Dictionary<Pawn, int>();
-                Log.Warning("[TheGodsAreReal]: Dude, the _lastFavorTick dict was missing, WTF?");
-
-                return -1;
-            }
-
             if (pawn == null) 
                 return -1;
 
