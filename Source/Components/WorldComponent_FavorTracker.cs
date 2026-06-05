@@ -48,6 +48,7 @@ namespace TheGodsAreReal
         private List<int> _lastFavorTickValues = new List<int>();
 
         private bool _suppressAllMotes = false; // Not currently used
+
         private const float MinimumMoteThreshold = 0.5f;
         private const float MaxFavor = 100;
         private const float MinFavor = -100;
@@ -59,6 +60,8 @@ namespace TheGodsAreReal
         // Dedicated zero-allocation operational buffers
         private readonly List<Pawn> _tempFavorKeys = new List<Pawn>();
         private readonly List<Pawn> _tempPurgeList = new List<Pawn>();
+        private Dictionary<Ideo, float> _ideoFavorCache = new Dictionary<Ideo, float>();
+        private Dictionary<Ideo, int> _ideoPawnCountCache = new Dictionary<Ideo, int>();
 
         // Hediff just used for testing right now
         private static readonly HediffDef _divineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
@@ -210,8 +213,24 @@ namespace TheGodsAreReal
             if (_lastFavorTick.TryGetValue(pawn, out int lastTick) && tick == lastTick)
                 return;
 
-            _pawnFavor.TryGetValue(pawn, out float currentFavor);
-            _pawnFavor[pawn] = Mathf.Clamp(currentFavor + amount, MinFavor, MaxFavor);
+            float oldFavor = GetFavor(pawn);
+            _pawnFavor[pawn] = Mathf.Clamp(oldFavor + amount, MinFavor, MaxFavor);
+
+            // Update Cache
+            if (pawn.Ideo != null)
+            {
+                float delta = _pawnFavor[pawn] - oldFavor;
+
+                if (!_ideoFavorCache.ContainsKey(pawn.Ideo))
+                {
+                    _ideoFavorCache[pawn.Ideo] = 0f;
+                    _ideoPawnCountCache[pawn.Ideo] = 0;
+                }
+
+                _ideoFavorCache[pawn.Ideo] += delta;
+                // Increment count only if this is a new pawn tracking entry
+                if (!_lastFavorTick.ContainsKey(pawn)) _ideoPawnCountCache[pawn.Ideo]++;
+            }
 
             if (pawn.Spawned && ((Mathf.Abs(amount) >= MinimumMoteThreshold && showMote && !_suppressAllMotes) || Settings.AlwaysShowMotes))
             {
@@ -283,27 +302,11 @@ namespace TheGodsAreReal
         /// <returns>The favor score of the Ideo (avg of pawn favor for ideo)</returns>
         public float GetIdeoFavor(Ideo ideo)
         {
-            if (ideo == null)
+            if (ideo == null || !_ideoFavorCache.ContainsKey(ideo))
                 return 0f;
 
-            float totalFavor = 0f;
-            int pawnCount = 0;
-            var pawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_OfPlayerFaction;
-
-            for (int i = 0; i < pawns.Count; i++)
-            {
-                Pawn p = pawns[i];
-                if (p.Ideo == ideo && p.RaceProps.Humanlike)
-                {
-                    pawnCount++;
-                    if (_pawnFavor.TryGetValue(p, out float favor))
-                    {
-                        totalFavor += favor;
-                    }
-                }
-            }
-
-            return pawnCount > 0 ? totalFavor / pawnCount : 0f;
+            int count = _ideoPawnCountCache[ideo];
+            return count > 0 ? _ideoFavorCache[ideo] / count : 0f;
         }
 
         /// <summary>
@@ -321,12 +324,46 @@ namespace TheGodsAreReal
         /// <param name="pawn">The pawn that died</param>
         public void Notify_PawnDied(Pawn pawn)
         {
-            float favor = GetFavor(pawn);
-            PawnDeathHandler.HandlePawnDeath(pawn, favor);
+            if (pawn.Ideo != null && _pawnFavor.TryGetValue(pawn, out float favor))
+            {
+                if (_ideoFavorCache.ContainsKey(pawn.Ideo))
+                {
+                    _ideoFavorCache[pawn.Ideo] -= favor;
+                    _ideoPawnCountCache[pawn.Ideo]--;
+                }
+
+                PawnDeathHandler.HandlePawnDeath(pawn, favor);
+            }
 
             // clean up the tracker data
             _pawnFavor.Remove(pawn);
             _lastFavorTick.Remove(pawn);
+        }
+
+        public void Notify_PawnIdeoChanged(Pawn pawn, Ideo oldIdeo, Ideo newIdeo)
+        {
+            if (pawn == null) 
+                return;
+
+            if (oldIdeo != null && _ideoFavorCache.ContainsKey(oldIdeo))
+            {
+                float favor = GetFavor(pawn);
+                _ideoFavorCache[oldIdeo] -= favor;
+                _ideoPawnCountCache[oldIdeo]--;
+            }
+
+            if (newIdeo != null)
+            {
+                if (!_ideoFavorCache.ContainsKey(newIdeo))
+                {
+                    _ideoFavorCache[newIdeo] = 0f;
+                    _ideoPawnCountCache[newIdeo] = 0;
+                }
+
+                float favor = GetFavor(pawn);
+                _ideoFavorCache[newIdeo] += favor;
+                _ideoPawnCountCache[newIdeo]++;
+            }
         }
 
         public override void ExposeData()

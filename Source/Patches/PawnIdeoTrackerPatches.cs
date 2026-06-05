@@ -34,10 +34,14 @@ namespace TheGodsAreReal.Patches
     [HarmonyPatch(typeof(Pawn_IdeoTracker), nameof(Pawn_IdeoTracker.SetIdeo))]
     public static class PawnIdeoTracker_SetIdeo
     {
+        static Ideo _oldIdeo;
+
         public static void Prefix(Pawn_IdeoTracker __instance, Ideo ideo, Pawn ___pawn)
         {
             if (___pawn == null || (!___pawn.IsColonist && !___pawn.IsSlaveOfColony) || __instance.Ideo == ideo)
                 return;
+
+            _oldIdeo = __instance.Ideo;
 
             var favorTracker = Find.World?.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker != null)
@@ -50,6 +54,16 @@ namespace TheGodsAreReal.Patches
                 }
             }
             
+        }
+
+        public static void Postfix(Pawn_IdeoTracker __instance, Ideo ideo)
+        {
+            if (_oldIdeo != ideo)
+            {
+                Pawn pawn = Traverse.Create(__instance).Field("pawn").GetValue<Pawn>();
+                Find.World?.GetComponent<WorldComponent_FavorTracker>()?.Notify_PawnIdeoChanged(pawn, _oldIdeo, ideo);
+            }
+            _oldIdeo = null;
         }
     }
 }
