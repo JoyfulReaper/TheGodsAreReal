@@ -80,13 +80,10 @@ namespace TheGodsAreReal.Patches
                 }
             }
 
-            if (!showMotes)
-            {
-                Messages.Message(
-                    "Devine Destruction Complete: The gods have observed the destruction. Favor has shifted among the participants.",
-                    MessageTypeDefOf.NeutralEvent
-                );
-            }
+            Messages.Message(
+                "Devine Destruction Complete: The gods have observed the destruction. Favor has shifted among the participants.",
+                MessageTypeDefOf.NeutralEvent
+            );
         }
 
         private static bool IsDivineThreat(ThingDef def)

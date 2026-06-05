@@ -141,16 +141,13 @@ namespace TheGodsAreReal.Patches
                 }
             }
 
-            if (!showMotes)
-            {
-                Messages.Message(
-                    "Ritual complete: The gods have observed the ceremony. Favor has shifted among the participants.",
-                    organizer ?? new LookTargets(jobRitual.Map.Center, jobRitual.Map),
-                    MessageTypeDefOf.NeutralEvent
-                );
-            }
-            
+            Messages.Message(
+                "Ritual complete: The gods have observed the ceremony. Favor has shifted among the participants.",
+                organizer ?? new LookTargets(jobRitual.Map.Center, jobRitual.Map),
+                MessageTypeDefOf.NeutralEvent
+            );
 
+            
             if(Prefs.DevMode)
                 Log.Message($"[TheGodsAreReal] Participant count: {totalPresence.Count}, showMotes: {showMotes}");
 

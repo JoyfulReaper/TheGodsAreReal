@@ -102,14 +102,13 @@ namespace TheGodsAreReal.Patches
                         }
                     }
                 }
-                if (!showMotes)
-                {
-                    Messages.Message(
-                        "Marriage complete: The gods have observed the ceremony. Favor has shifted among the participants.",
-                        firstPawn ?? secondPawn,
-                        MessageTypeDefOf.NeutralEvent
-                    );
-                }
+
+                Messages.Message(
+                    "Marriage complete: The gods have observed the ceremony. Favor has shifted among the participants.",
+                    firstPawn ?? secondPawn,
+                    MessageTypeDefOf.NeutralEvent
+                );
+                
             }
         }
     }
