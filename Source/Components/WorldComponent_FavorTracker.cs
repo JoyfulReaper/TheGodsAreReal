@@ -33,6 +33,8 @@ using TheGodsAreReal.Utilities;
 using UnityEngine;
 using Verse;
 
+// TODO: We want to turn pretty much everything into settings so user can adjust later.
+
 namespace TheGodsAreReal
 {
     public class WorldComponent_FavorTracker : WorldComponent
@@ -54,10 +56,11 @@ namespace TheGodsAreReal
         private List<Ideo> _ideoCountKeys = new List<Ideo>();
         private List<int> _ideoCountValues = new List<int>();
 
-
+        // May implement for option to turn off all motes from settings later
         private bool _suppressAllMotes = false; // Not currently used
-
         private const float MinimumMoteThreshold = 0.5f;
+
+        // Favor
         private const float MaxFavor = 100;
         private const float MinFavor = -100;
 
@@ -70,9 +73,6 @@ namespace TheGodsAreReal
         private readonly List<Pawn> _tempPurgeList = new List<Pawn>();
         private Dictionary<Ideo, float> _ideoFavorCache = new Dictionary<Ideo, float>();
         private Dictionary<Ideo, int> _ideoPawnCountCache = new Dictionary<Ideo, int>();
-
-        // Hediff just used for testing right now
-        private static readonly HediffDef _divineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
 
         private const int RareTickValue = 250;
 
@@ -88,12 +88,6 @@ namespace TheGodsAreReal
         {
             base.WorldComponentTick();
 
-            // Decay Favor
-            if (Find.TickManager.TicksGame % _decayIntervalTicks == 0)
-            {
-                DecayPassiveFavor();
-            }
-
             // Rare Tick //
             if (Find.TickManager.TicksGame % RareTickValue != 0)
                 return;
@@ -103,51 +97,20 @@ namespace TheGodsAreReal
 
         private void RareTick()
         {
-            ApplyHediffs();
+            DevineEventHandler.HandleDevineEvents();
+            DecayPassiveFavor();
+            HediffHandler.ApplyHediffs();
         }
 
-        // TODO: This will need to be moved into a different file
-        private void ApplyHediffs()
-        {
-            foreach (Pawn pawn in GodsAreRealPawnUtility.GetAllColonyPawns())
-            {
-                if (pawn == null || pawn.Dead || !pawn.RaceProps.Humanlike || pawn.Ideo?.KeyDeityName == null)
-                    continue;
-
-                UpdatePawnDivineHediff(pawn);
-            }
-        }
-
-        // TODO: This will need to be moved into a different file
-        private void UpdatePawnDivineHediff(Pawn pawn)
-        {
-            float favor = this.GetFavor(pawn);
-            float normalizedSeverity = Mathf.Clamp01((favor + 100f) / 200f);
-            // Map the favor score (-100.0 to 100.0) to a C# normalized float scale (0.0 to 1.0)
-            // -100 favor becomes 0.0 severity (Pure Wrath)
-            //    0 favor becomes 0.5 severity (Neutral / Hidden)
-            // +100 favor becomes 1.0 severity (Pure Grace)
-
-            // Look for an existing instance of our Hediff on the pawn
-            Hediff existingHediff = pawn.health?.hediffSet?.GetFirstHediffOfDef(_divineTouchDef);
-
-            if (existingHediff != null)
-            {
-                // Update the severity level dynamically as their behavior changes
-                existingHediff.Severity = normalizedSeverity;
-            }
-            else
-            {
-                // If they don't have the hediff yet, create it and inject it into their health tracker
-                Hediff newHediff = HediffMaker.MakeHediff(_divineTouchDef, pawn);
-                newHediff.Severity = normalizedSeverity;
-                pawn.health?.AddHediff(newHediff);
-            }
-        }
 
 
         private void DecayPassiveFavor()
         {
+            if (Find.TickManager.TicksGame % _decayIntervalTicks != 0)
+            {
+                return;
+            }
+
             if (_pawnFavor.Count == 0)
                 return;
 
