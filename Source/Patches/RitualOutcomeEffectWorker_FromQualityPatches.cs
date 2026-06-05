@@ -52,7 +52,7 @@ namespace TheGodsAreReal.Patches
         private const float FlawedFavorChange = 2f;
         private const float SatisfyingFavorChange = 8f;
         private const float SpectacularFavorChange = 20f;
-        private const float DisbelieverPenalty = -0.3f;
+        private const float DisbelieverPenalty = -3f;
 
         // Modifies and Threshholds
         private const float OrganizerBonusMultiplier = 1.25f;
@@ -118,6 +118,7 @@ namespace TheGodsAreReal.Patches
 
                 if (participant.Ideo == ritualIdeo)
                 {
+                    // Same ideo
                     var currentFavor = tracker.GetFavor(participant);
                     if (currentFavor > HighFavorPenaltyThreshold)
                     {
@@ -128,6 +129,7 @@ namespace TheGodsAreReal.Patches
                 }
                 else
                 {
+                    // different ideo
                     individualFavorChange = DisbelieverPenalty;
                     tracker.AddFavor(participant, individualFavorChange, showMotes);
                 }
