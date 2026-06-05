@@ -44,8 +44,16 @@ namespace TheGodsAreReal
         // Used by Scribe for saving/loading the dictionaries
         private List<Pawn> _pawnFavorKeys = new List<Pawn>();
         private List<float> _pawnFavorValues = new List<float>();
+
         private List<Pawn> _lastFavorTickKeys = new List<Pawn>();
         private List<int> _lastFavorTickValues = new List<int>();
+
+        private List<Ideo> _ideoFavorKeys = new List<Ideo>();
+        private List<float> _ideoFavorValues = new List<float>();
+
+        private List<Ideo> _ideoCountKeys = new List<Ideo>();
+        private List<int> _ideoCountValues = new List<int>();
+
 
         private bool _suppressAllMotes = false; // Not currently used
 
@@ -66,11 +74,11 @@ namespace TheGodsAreReal
         // Hediff just used for testing right now
         private static readonly HediffDef _divineTouchDef = HediffDef.Named("TheGodsAreReal_DivineTouch");
 
-        private const int RareTickValue = 250; 
+        private const int RareTickValue = 250;
 
         private TheGodsAreRealSettings Settings => TheGodsAreRealMod.Settings;
 
-        public IReadOnlyDictionary<Pawn, float> PawnFavor => 
+        public IReadOnlyDictionary<Pawn, float> PawnFavor =>
             _pawnFavor;
 
 
@@ -282,7 +290,7 @@ namespace TheGodsAreReal
         /// <returns>Last tick favor changed</returns>
         public int GetLastFavorTick(Pawn pawn)
         {
-            if (pawn == null) 
+            if (pawn == null)
                 return -1;
 
             return _lastFavorTick.TryGetValue(pawn, out int tick) ? tick : -1;
@@ -342,7 +350,7 @@ namespace TheGodsAreReal
 
         public void Notify_PawnIdeoChanged(Pawn pawn, Ideo oldIdeo, Ideo newIdeo)
         {
-            if (pawn == null) 
+            if (pawn == null)
                 return;
 
             if (oldIdeo != null && _ideoFavorCache.ContainsKey(oldIdeo))
@@ -366,6 +374,34 @@ namespace TheGodsAreReal
             }
         }
 
+        //private void InitializeCache()
+        //{
+        //    _ideoFavorCache.Clear();
+        //    _ideoPawnCountCache.Clear();
+
+        //    // Iterate over all pawns currently in the tracker
+        //    foreach (var kvp in _pawnFavor)
+        //    {
+        //        Pawn pawn = kvp.Key;
+        //        float favor = kvp.Value;
+
+        //        if (pawn.Ideo != null)
+        //        {
+        //            if (!_ideoFavorCache.ContainsKey(pawn.Ideo))
+        //            {
+        //                _ideoFavorCache[pawn.Ideo] = 0f;
+        //                _ideoPawnCountCache[pawn.Ideo] = 0;
+        //            }
+
+        //            _ideoFavorCache[pawn.Ideo] += favor;
+        //            _ideoPawnCountCache[pawn.Ideo]++;
+        //        }
+        //    }
+
+        //    if (Prefs.DevMode)
+        //        Log.Message($"[TheGodsAreReal] Cache initialized for {_ideoFavorCache.Count} Ideologies.");
+        //}
+
         public override void ExposeData()
         {
             base.ExposeData();
@@ -373,15 +409,21 @@ namespace TheGodsAreReal
             // Scribe needs the ref lists to hold data temporarily during the loading phase
             Scribe_Collections.Look(ref _pawnFavor, "pawnFavor", LookMode.Reference, LookMode.Value, ref _pawnFavorKeys, ref _pawnFavorValues);
             Scribe_Collections.Look(ref _lastFavorTick, "lastFavorTick", LookMode.Reference, LookMode.Value, ref _lastFavorTickKeys, ref _lastFavorTickValues);
+            Scribe_Collections.Look(ref _ideoFavorCache, "ideoFavorCache", LookMode.Reference, LookMode.Value, ref _ideoFavorKeys, ref _ideoFavorValues);
+            Scribe_Collections.Look(ref _ideoPawnCountCache, "ideoCountCache", LookMode.Reference, LookMode.Value, ref _ideoCountKeys, ref _ideoCountValues);
 
             if (Scribe.mode == LoadSaveMode.PostLoadInit)
             {
                 if (_pawnFavor == null) _pawnFavor = new Dictionary<Pawn, float>();
                 if (_lastFavorTick == null) _lastFavorTick = new Dictionary<Pawn, int>();
+                if (_ideoFavorCache == null) _ideoFavorCache = new Dictionary<Ideo, float>();
+                if (_ideoPawnCountCache == null) _ideoPawnCountCache = new Dictionary<Ideo, int>();
 
                 // Drop any entries that failed to cross-reference on load
                 _pawnFavor.RemoveAll(kvp => kvp.Key == null);
                 _lastFavorTick.RemoveAll(kvp => kvp.Key == null);
+
+                //InitializeCache();
             }
         }
     }
