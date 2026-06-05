@@ -31,6 +31,7 @@ using System.Linq;
 using TheGodsAreReal.Utilities;
 using UnityEngine;
 using Verse;
+using Verse.Noise;
 
 namespace TheGodsAreReal.Patches
 {
@@ -65,7 +66,7 @@ namespace TheGodsAreReal.Patches
             Pawn accepter = __instance.AccepterPawn;
 
             var colonyPawns = GodsAreRealPawnUtility.GetAllColonyPawnsExceptPrisoners();
-            bool showMotes = colonyPawns.Count <= DisableMotesThreshold;
+            bool showMotes = colonyPawns.Take(DisableMotesThreshold + 1).Count() <= DisableMotesThreshold;
 
             foreach (Pawn p in colonyPawns)
             {

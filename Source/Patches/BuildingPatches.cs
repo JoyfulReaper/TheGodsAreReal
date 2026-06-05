@@ -42,12 +42,7 @@ namespace TheGodsAreReal.Patches
 
             Ideo primaryIdeo = Faction.OfPlayer.ideos.PrimaryIdeo;
             var validPawns = GodsAreRealPawnUtility.GetAllColonyPawnsOnMap(map);
-
-            var showMotes = true;
-            if (validPawns.Count > DisableMotesThreshold)
-            {
-                showMotes = false;
-            }
+            bool showMotes = validPawns.Take(DisableMotesThreshold + 1).Count() <= DisableMotesThreshold;
 
             foreach (var pawn in validPawns)
             {

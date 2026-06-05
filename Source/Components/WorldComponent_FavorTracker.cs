@@ -109,11 +109,8 @@ namespace TheGodsAreReal
         // TODO: This will need to be moved into a different file
         private void ApplyHediffs()
         {
-            var colonists = GodsAreRealPawnUtility.GetAllColonyPawns();
-
-            for (int i = 0; i < colonists.Count; i++)
+            foreach (Pawn pawn in GodsAreRealPawnUtility.GetAllColonyPawns())
             {
-                Pawn pawn = colonists[i];
                 if (pawn == null || pawn.Dead || !pawn.RaceProps.Humanlike || pawn.Ideo?.KeyDeityName == null)
                     continue;
 

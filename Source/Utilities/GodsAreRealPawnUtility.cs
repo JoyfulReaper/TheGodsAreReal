@@ -31,7 +31,8 @@ using System.Linq;
 using Verse;
 
 // TODO: We might want to consider changing these from returning lists to using IEnumerable or Yeild Return
-// This will avoid allocating new Lists on the heap.
+// This will avoid allocating new Lists on the heap. Trade off is if you need a list you do a .ToList() and
+// just lost the benefits. Ok I did this for all except the methods that just wrap rimworlds methods.
 
 namespace TheGodsAreReal.Utilities
 {
@@ -44,10 +45,9 @@ namespace TheGodsAreReal.Utilities
         /// All of the colony pawns including slaves and prisoners
         /// </summary>
         /// <returns></returns>
-        public static List<Pawn> GetAllColonyPawns()
+        public static IEnumerable<Pawn> GetAllColonyPawns()
         {
-            List<Pawn> allLivingPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive;
-            List<Pawn> result = new List<Pawn>(allLivingPawns.Count);
+            var allLivingPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive;
 
             for (int i = 0; i < allLivingPawns.Count; i++)
             {
@@ -55,21 +55,18 @@ namespace TheGodsAreReal.Utilities
 
                 if ((pawn.IsColonist || pawn.IsPrisonerOfColony || pawn.IsSlaveOfColony) && pawn.RaceProps.Humanlike)
                 {
-                    result.Add(pawn);
+                    yield return pawn;
                 }
             }
-
-            return result;
         }
 
         /// <summary>
         /// All of the colony pawns including slaves, but not prisoners
         /// </summary>
         /// <returns></returns>
-        public static List<Pawn> GetAllColonyPawnsExceptPrisoners()
+        public static IEnumerable<Pawn> GetAllColonyPawnsExceptPrisoners()
         {
-            List<Pawn> allLivingPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive;
-            List<Pawn> result = new List<Pawn>(allLivingPawns.Count);
+            var allLivingPawns = PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive;
 
             for (int i = 0; i < allLivingPawns.Count; i++)
             {
@@ -77,70 +74,54 @@ namespace TheGodsAreReal.Utilities
 
                 if ((pawn.IsColonist || pawn.IsSlaveOfColony) && pawn.RaceProps.Humanlike)
                 {
-                    result.Add(pawn);
+                    yield return pawn;
                 }
             }
-
-            return result;
         }
 
         /// <summary>
         /// All of the colony pawns that are "free" (not slave/prisoner)
         /// </summary>
         /// <returns></returns>
-        public static List<Pawn> GetAllFreeColonyPawns()
-        {
-            return PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
-        }
+        public static List<Pawn> GetAllFreeColonyPawns() => 
+            PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_FreeColonists;
 
         /// <summary>
         /// All of the colony's priosners
         /// </summary>
         /// <returns></returns>
-        public static List<Pawn> GetAllColonyPrisoners()
-        {
-            return PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony;
-        }
+        public static List<Pawn> GetAllColonyPrisoners() => 
+            PawnsFinder.AllMapsCaravansAndTravellingTransporters_Alive_PrisonersOfColony;
 
         /// <summary>
         /// All of the colony's priosners
         /// </summary>
         /// <param name="map">Map to check</param>
         /// <returns>Priosners on map</returns>
-        public static List<Pawn> GetAllColonyPrisonersOnMap(Map map)
-        {
-            if(map == null)
-            {
-                return new List<Pawn>();
-            }
-
-            return map.mapPawns.PrisonersOfColonySpawned;
-        }
+        public static List<Pawn> GetAllColonyPrisonersOnMap(Map map) => 
+            map?.mapPawns.PrisonersOfColonySpawned ?? new List<Pawn>();
 
         /// <summary>
         /// All of the colony's pawns on map
         /// </summary>
         /// <param name="map">Maps to check</param>
         /// <returns>All colony's pawns excluding prisoners</returns>
-        public static List<Pawn> GetAllColonyPawnsOnMap(Map map)
+        public static IEnumerable<Pawn> GetAllColonyPawnsOnMap(Map map)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
             var allSpawned = map.mapPawns.AllPawnsSpawned;
-            List<Pawn> result = new List<Pawn>();
-
             for (int i = 0; i < allSpawned.Count; i++)
             {
                 Pawn p = allSpawned[i];
                 if ((p.IsColonist || p.IsSlaveOfColony) && p.RaceProps.Humanlike)
                 {
-                    result.Add(p);
+                    yield return p;
                 }
             }
-            return result;
         }
 
         /// <summary>
@@ -148,51 +129,35 @@ namespace TheGodsAreReal.Utilities
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetAllFreePawnsOnMap(Map map)
-        {
-            if (map == null)
-            {
-                return new List<Pawn>();
-            }
-
-            return map.mapPawns.FreeColonists;
-        }
+        public static List<Pawn> GetAllFreePawnsOnMap(Map map) => 
+            map?.mapPawns.FreeColonists ?? new List<Pawn>();
 
         /// <summary>
         /// All Slaves on map
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetAllSlavePawnsOnMap(Map map)
-        {
-            if (map == null)
-            {
-                return new List<Pawn>();
-            }
-
-            return map.mapPawns.SlavesOfColonySpawned;
-        }
+        public static List<Pawn> GetAllSlavePawnsOnMap(Map map) => 
+            map?.mapPawns.SlavesOfColonySpawned ?? new List<Pawn>();
 
         /// <summary>
         /// All Downed Colonists on map
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetDownedColonyPawns(Map map)
+        public static IEnumerable<Pawn> GetDownedColonyPawns(Map map)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
             var pawns = map.mapPawns.AllPawnsSpawned;
-            List<Pawn> result = new List<Pawn>();
             for (int i = 0; i < pawns.Count; i++)
             {
                 if ((pawns[i].IsColonist || pawns[i].IsSlaveOfColony) && pawns[i].Downed && pawns[i].RaceProps.Humanlike)
-                    result.Add(pawns[i]);
+                    yield return (pawns[i]);
             }
-            return result;
         }
 
         /// <summary>
@@ -200,25 +165,23 @@ namespace TheGodsAreReal.Utilities
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetCapableColonyPawns(Map map)
+        public static IEnumerable<Pawn> GetCapableColonyPawns(Map map)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
             var freeColonists = map.mapPawns.AllPawnsSpawned;
-            List<Pawn> result = new List<Pawn>(freeColonists.Count);
 
             for (int i = 0; i < freeColonists.Count; i++)
             {
                 Pawn p = freeColonists[i];
                 if (p.Awake() && !p.Downed && !p.InMentalState && (p.IsColonist || p.IsSlaveOfColony) && p.RaceProps.Humanlike)
                 {
-                    result.Add(p);
+                    yield return p;
                 }
             }
-            return result;
         }
 
         /// <summary>
@@ -226,10 +189,8 @@ namespace TheGodsAreReal.Utilities
         /// </summary>
         /// <param name="p"></param>
         /// <returns></returns>
-        public static bool IsPawnConsciousAndActive(Pawn p)
-        {
-            return p.Spawned && !p.Dead && p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && !p.Downed;
-        }
+        public static bool IsPawnConsciousAndActive(Pawn p) => 
+            p.Spawned && !p.Dead && p.health.capacities.CapableOf(PawnCapacityDefOf.Manipulation) && !p.Downed;
 
         /// <summary>
         /// Get all pawns having a given mental state
@@ -237,22 +198,20 @@ namespace TheGodsAreReal.Utilities
         /// <param name="map"></param>
         /// <param name="stateDef"></param>
         /// <returns></returns>
-        public static List<Pawn> GetPawnsInMentalState(Map map, MentalStateDef stateDef)
+        public static IEnumerable<Pawn> GetPawnsInMentalState(Map map, MentalStateDef stateDef)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
             var allPawns = map.mapPawns.AllPawnsSpawned;
-            List<Pawn> result = new List<Pawn>();
             for (int i = 0; i < allPawns.Count; i++)
             {
                 Pawn p = allPawns[i];
                 if (p.InMentalState && p.MentalStateDef == stateDef)
-                    result.Add(p);
+                    yield return p;
             }
-            return result;
         }
 
         /// <summary>
@@ -260,26 +219,23 @@ namespace TheGodsAreReal.Utilities
         /// </summary>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetPawnsCurrentlyPraying(Map map)
+        public static IEnumerable<Pawn> GetPawnsCurrentlyPraying(Map map)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
             var freeColonists = map.mapPawns.FreeColonists;
-            List<Pawn> result = new List<Pawn>();
 
             for (int i = 0; i < freeColonists.Count; i++)
             {
                 Pawn p = freeColonists[i];
                 if (p.CurJobDef == JobDefOf.MeditatePray)
                 {
-                    result.Add(p);
+                    yield return p;
                 }
             }
-
-            return result;
         }
 
         /// <summary>
@@ -288,21 +244,19 @@ namespace TheGodsAreReal.Utilities
         /// <param name="map"></param>
         /// <param name="faction"></param>
         /// <returns></returns>
-        public static List<Pawn> GetColonyPawnsByFaction(Map map, Faction faction)
+        public static IEnumerable<Pawn> GetColonyPawnsByFaction(Map map, Faction faction)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
             var pawns = map.mapPawns.AllPawnsSpawned;
-            List<Pawn> result = new List<Pawn>();
             for (int i = 0; i < pawns.Count; i++)
             {
                 if (pawns[i].Faction == faction)
-                    result.Add(pawns[i]);
+                    yield return pawns[i];
             }
-            return result;
         }
 
         /// <summary>
@@ -310,17 +264,15 @@ namespace TheGodsAreReal.Utilities
         /// </summary>
         /// <param name="ideo"></param>
         /// <returns></returns>
-        public static List<Pawn> GetAllIdeoMembers(Ideo ideo)
+        public static IEnumerable<Pawn> GetAllIdeoMembers(Ideo ideo)
         {
-            List<Pawn> members = new List<Pawn>();
             foreach (Pawn pawn in PawnsFinder.AllMapsAndWorld_Alive)
             {
                 if (pawn.Ideo == ideo && pawn.RaceProps.Humanlike)
                 {
-                    members.Add(pawn);
+                    yield return pawn;
                 }
             }
-            return members;
         }
 
         /// <summary>
@@ -329,22 +281,20 @@ namespace TheGodsAreReal.Utilities
         /// <param name="ideo"></param>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetAllIdeoMembers(Ideo ideo, Map map)
+        public static IEnumerable<Pawn> GetAllIdeoMembers(Ideo ideo, Map map)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
-            List<Pawn> members = new List<Pawn>();
             foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
             {
                 if (pawn.Ideo == ideo && pawn.RaceProps.Humanlike)
                 {
-                    members.Add(pawn);
+                    yield return pawn;
                 }
             }
-            return members;
         }
 
         /// <summary>
@@ -352,17 +302,15 @@ namespace TheGodsAreReal.Utilities
         /// </summary>
         /// <param name="ideo"></param>
         /// <returns></returns>
-        public static List<Pawn> GetColonyIdeoMembers(Ideo ideo)
+        public static IEnumerable<Pawn> GetColonyIdeoMembers(Ideo ideo)
         {
-            List<Pawn> members = new List<Pawn>();
             foreach (Pawn pawn in GetAllColonyPawns())
             {
                 if (pawn.Ideo == ideo && pawn.RaceProps.Humanlike)
                 {
-                    members.Add(pawn);
+                    yield return pawn;
                 }
             }
-            return members;
         }
 
         /// <summary>
@@ -371,22 +319,20 @@ namespace TheGodsAreReal.Utilities
         /// <param name="ideo"></param>
         /// <param name="map"></param>
         /// <returns></returns>
-        public static List<Pawn> GetColonyIdeoMembers(Ideo ideo, Map map)
+        public static IEnumerable<Pawn> GetColonyIdeoMembers(Ideo ideo, Map map)
         {
             if (map == null)
             {
-                return new List<Pawn>();
+                yield break;
             }
 
-            List<Pawn> members = new List<Pawn>();
             foreach (Pawn pawn in GetAllColonyPawnsOnMap(map))
             {
                 if (pawn.Ideo == ideo && pawn.RaceProps.Humanlike)
                 {
-                    members.Add(pawn);
+                    yield return pawn;
                 }
             }
-            return members;
         }
 
 
