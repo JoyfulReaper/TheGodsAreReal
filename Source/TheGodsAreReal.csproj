@@ -54,6 +54,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Handlers\ConversionHandler.cs" />
+    <Compile Include="Handlers\DevineEventHandler.cs" />
+    <Compile Include="Handlers\HediffHandler.cs" />
     <Compile Include="Handlers\PawnDeathHandler.cs" />
     <Compile Include="Patches\BuildingPatches.cs" />
     <Compile Include="Patches\CompAbilityEffect_ConvertPatches.cs" />
@@ -72,6 +74,7 @@
     <Compile Include="Settings\TheGodsAreRealSettings.cs" />
     <Compile Include="Thoughts\ThoughtWorker_GodFavor.cs" />
     <Compile Include="Components\WorldComponent_FavorTracker.cs" />
+    <Compile Include="Utilities\GodsAreRealEventUtility.cs" />
     <Compile Include="Utilities\GodsAreRealPawnUtility.cs" />
   </ItemGroup>
   <ItemGroup>
