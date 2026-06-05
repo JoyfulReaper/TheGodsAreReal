@@ -266,8 +266,11 @@ namespace TheGodsAreReal.Utilities
         /// <returns></returns>
         public static IEnumerable<Pawn> GetAllIdeoMembers(Ideo ideo)
         {
-            foreach (Pawn pawn in PawnsFinder.AllMapsAndWorld_Alive)
+            var allLivingPawns = PawnsFinder.AllMapsAndWorld_Alive;
+
+            for (int i = 0; i < allLivingPawns.Count; i++)
             {
+                Pawn pawn = allLivingPawns[i];
                 if (pawn.Ideo == ideo && pawn.RaceProps.Humanlike)
                 {
                     yield return pawn;
@@ -288,12 +291,12 @@ namespace TheGodsAreReal.Utilities
                 yield break;
             }
 
-            foreach (Pawn pawn in map.mapPawns.AllPawnsSpawned)
+            var allSpawned = map.mapPawns.AllPawnsSpawned;
+            for (int i = 0; i < allSpawned.Count; i++)
             {
-                if (pawn.Ideo == ideo && pawn.RaceProps.Humanlike)
-                {
-                    yield return pawn;
-                }
+                Pawn p = allSpawned[i];
+                if (p.Ideo == ideo && p.RaceProps.Humanlike)
+                    yield return p;
             }
         }
 
