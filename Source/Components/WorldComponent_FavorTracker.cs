@@ -106,7 +106,7 @@ namespace TheGodsAreReal
             ApplyHediffs();
         }
 
-        // TODO Make a handler for hediffs
+        // TODO: This will need to be moved into a different file
         private void ApplyHediffs()
         {
             var colonists = GodsAreRealPawnUtility.GetAllColonyPawns();
@@ -121,6 +121,7 @@ namespace TheGodsAreReal
             }
         }
 
+        // TODO: This will need to be moved into a different file
         private void UpdatePawnDivineHediff(Pawn pawn)
         {
             float favor = this.GetFavor(pawn);
@@ -296,13 +297,6 @@ namespace TheGodsAreReal
             return _lastFavorTick.TryGetValue(pawn, out int tick) ? tick : -1;
         }
 
-        // This checks against an indvidual diety the ideo could have 0 or more dieties
-        // Currently not used
-        public bool PawnWorships(Pawn pawn, PreceptDef godPrecept)
-        {
-            return pawn.Ideo != null && pawn.Ideo.HasPrecept(godPrecept);
-        }
-
         /// <summary>
         /// Get the favor score of an Ideology
         /// </summary>
@@ -374,34 +368,6 @@ namespace TheGodsAreReal
             }
         }
 
-        //private void InitializeCache()
-        //{
-        //    _ideoFavorCache.Clear();
-        //    _ideoPawnCountCache.Clear();
-
-        //    // Iterate over all pawns currently in the tracker
-        //    foreach (var kvp in _pawnFavor)
-        //    {
-        //        Pawn pawn = kvp.Key;
-        //        float favor = kvp.Value;
-
-        //        if (pawn.Ideo != null)
-        //        {
-        //            if (!_ideoFavorCache.ContainsKey(pawn.Ideo))
-        //            {
-        //                _ideoFavorCache[pawn.Ideo] = 0f;
-        //                _ideoPawnCountCache[pawn.Ideo] = 0;
-        //            }
-
-        //            _ideoFavorCache[pawn.Ideo] += favor;
-        //            _ideoPawnCountCache[pawn.Ideo]++;
-        //        }
-        //    }
-
-        //    if (Prefs.DevMode)
-        //        Log.Message($"[TheGodsAreReal] Cache initialized for {_ideoFavorCache.Count} Ideologies.");
-        //}
-
         public override void ExposeData()
         {
             base.ExposeData();
@@ -423,7 +389,6 @@ namespace TheGodsAreReal
                 _pawnFavor.RemoveAll(kvp => kvp.Key == null);
                 _lastFavorTick.RemoveAll(kvp => kvp.Key == null);
 
-                //InitializeCache();
             }
         }
     }
