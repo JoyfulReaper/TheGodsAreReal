@@ -332,6 +332,11 @@ namespace TheGodsAreReal
         {
             base.ExposeData();
 
+            if (Scribe.mode == LoadSaveMode.Saving)
+            {
+                PruneInvalidEntries();
+            }
+
             // Scribe needs the ref lists to hold data temporarily during the loading phase
             Scribe_Collections.Look(ref _pawnFavor, "pawnFavor", LookMode.Reference, LookMode.Value, ref _pawnFavorKeys, ref _pawnFavorValues);
             Scribe_Collections.Look(ref _lastFavorTick, "lastFavorTick", LookMode.Reference, LookMode.Value, ref _lastFavorTickKeys, ref _lastFavorTickValues);
@@ -348,7 +353,36 @@ namespace TheGodsAreReal
                 // Drop any entries that failed to cross-reference on load
                 _pawnFavor.RemoveAll(kvp => kvp.Key == null);
                 _lastFavorTick.RemoveAll(kvp => kvp.Key == null);
+                PruneInvalidEntries();
+            }
+        }
 
+        private void PruneInvalidEntries()
+        {
+            int ideoFavorBefore = _ideoFavorCache.Count;
+            int ideoCountBefore = _ideoPawnCountCache.Count;
+            int pawnFavorBefore = _pawnFavor.Count;
+            int lastTickBefore = _lastFavorTick.Count;
+
+            _ideoFavorCache.RemoveAll(kvp => kvp.Key == null);
+            _ideoPawnCountCache.RemoveAll(kvp => kvp.Key == null);
+            _pawnFavor.RemoveAll(kvp => kvp.Key == null);
+            _lastFavorTick.RemoveAll(kvp => kvp.Key == null);
+
+            int ideoFavorRemoved = ideoFavorBefore - _ideoFavorCache.Count;
+            int ideoCountRemoved = ideoCountBefore - _ideoPawnCountCache.Count;
+            int pawnFavorRemoved = pawnFavorBefore - _pawnFavor.Count;
+            int lastTickRemoved = lastTickBefore - _lastFavorTick.Count;
+
+            int totalRemoved = ideoFavorRemoved + ideoCountRemoved + pawnFavorRemoved + lastTickRemoved;
+
+            if (totalRemoved > 0 && Prefs.DevMode)
+            {
+                Log.Message($"[TheGodsAreReal] Pruned {totalRemoved} invalid entries:");
+                if (ideoFavorRemoved > 0) Log.Message($"- IdeoFavorCache: {ideoFavorRemoved} removed");
+                if (ideoCountRemoved > 0) Log.Message($"- IdeoPawnCountCache: {ideoCountRemoved} removed");
+                if (pawnFavorRemoved > 0) Log.Message($"- PawnFavor: {pawnFavorRemoved} removed");
+                if (lastTickRemoved > 0) Log.Message($"- LastFavorTick: {lastTickRemoved} removed");
             }
         }
     }
