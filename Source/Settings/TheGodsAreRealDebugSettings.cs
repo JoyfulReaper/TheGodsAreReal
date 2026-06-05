@@ -144,13 +144,13 @@ namespace TheGodsAreReal.Settings
                 }
             }
 
-            DoDebugDataOverview(listing);
-            DoPawnFavorList(listing, pawns);
+            DoDebugDataOverview(listing, favorTracker);
+            DoPawnFavorList(listing, pawns, favorTracker);
+            DoIdeoFavorList(listing, favorTracker);
         }
 
-        private static void DoDebugDataOverview(Listing_Standard listing)
+        private static void DoDebugDataOverview(Listing_Standard listing, WorldComponent_FavorTracker favorTracker)
         {
-            WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker == null) return;
 
 
@@ -163,7 +163,7 @@ namespace TheGodsAreReal.Settings
                 totalGlobalFavor += val;
             }
 
-            listing.Label($"Total Global Favor: {totalGlobalFavor:F1}");
+            listing.Label($"Total Global Favor: {totalGlobalFavor:F2}");
             listing.Label($"Average Favor/Pawn: {(favorTracker.PawnFavor.Count > 0 ? (totalGlobalFavor / favorTracker.PawnFavor.Count).ToString("F1") : "N/A")}");
 
             if (listing.ButtonText("Clear All Data (DANGER)"))
@@ -173,9 +173,8 @@ namespace TheGodsAreReal.Settings
             }
         }
 
-        private static void DoPawnFavorList(Listing_Standard listing, List<Pawn> pawns)
+        private static void DoPawnFavorList(Listing_Standard listing, List<Pawn> pawns, WorldComponent_FavorTracker favorTracker)
         {
-            WorldComponent_FavorTracker favorTracker = Find.World.GetComponent<WorldComponent_FavorTracker>();
             if (favorTracker == null) return;
 
             listing.Label("--- Colony Favor Overview ---", 24f);
@@ -184,6 +183,32 @@ namespace TheGodsAreReal.Settings
             {
                 float favor = favorTracker.GetFavor(p);
                 listing.Label($"{p.LabelShort}: {favor:F1}");
+            }
+        }
+
+        private static void DoIdeoFavorList(Listing_Standard listing, WorldComponent_FavorTracker favorTracker)
+        {
+            if (favorTracker == null) 
+                return;
+
+            listing.Label("--- Ideology Favor Overview ---", 24f);
+
+            // Get all unique Ideos from the pawns we are tracking
+            var trackedIdeos = favorTracker.PawnFavor.Keys
+                .Select(p => p.Ideo)
+                .Where(i => i != null)
+                .Distinct();
+
+            if (!trackedIdeos.Any())
+            {
+                listing.Label("No Ideos currently being tracked. Do you have a diety?");
+                return;
+            }
+
+            foreach (Ideo ideo in trackedIdeos)
+            {
+                float avgFavor = favorTracker.GetIdeoFavor(ideo);
+                listing.Label($"{ideo.name}: {avgFavor:F1}");
             }
         }
     }
