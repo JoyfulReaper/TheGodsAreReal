@@ -1,30 +1,49 @@
-The Gods Are Real (RimWorld Mod)
-A RimWorld mod that introduces a dynamic, per-pawn "Favor" system tied to Ideology. Pawns are no longer just followers—their devotion is a measurable, shifting resource that determines their relationship with their deity.
+# [TGAR-CORE: SYSTEMS ARCHITECTURE MANUAL]
 
-How It Works
-The Favor System
-Favor tracking: Each pawn's favor level is tracked in real-time, ranging from -100 (Divine Wrath) to +100 (Divine Grace).
+**PROTOCOL ID:** TGAR-FAVOR-01  
+**CODENAME:** The Gods Are Real  
+**SYSTEM STATUS:** PRE-ALPHA / ACTIVE DEVELOPMENT  
+**MAINTAINER:** K. GIVLER (ADMIN)  
 
-Decay: Favor is a fleeting resource. Without active worship, it will naturally decay toward zero over time.
+---
 
-Divine Hediff: Your standing with your deity is reflected in the Divine Touch health condition (Hediff), which updates dynamically based on your current favor level.
+## 1.0 SYSTEM OVERVIEW
 
-How to Gain Favor
-Rituals: The primary engine for favor. A "Spectacular" ritual can grant massive favor boosts, while failed rituals or the presence of heretics (non-believers) will result in penalties.
+**The Gods Are Real** utility introduces a dynamic, per-pawn tracking architecture that quantifies religious devotion into a measurable, shifting resource known as **Favor**. Under this framework, pawns no longer maintain static ideological alignments; instead, their active devotion directly influences and determines their real-time relationship metrics with their designated deity.
 
-Prayer: Actively praying at a Stele provides a steady, reliable drip of favor over time.
+## 2.0 THE FAVOR SUBSYSTEM
 
-Daily Devotion: Positive thoughts tied to your Ideology's precepts will provide a small, constant increase in favor, rewarding pawns who live according to their faith.
+The core engine monitors and updates individual pawn dedication metrics using three primary tracking routines:
 
-Consequences
-Divine Grace: High favor rewards the faithful with mood buffs.
+* **Favor Tracking:** Individual pawn standing is tracked in real-time, operating within a strict numerical range from `-100` (Divine Wrath) to `+100` (Divine Grace).
+* **Decay Routine:** Favor is a volatile resource. In the absence of active worship or religious engagement, values will naturally decay toward a baseline of `0` over time.
+* **Divine Hediff Implementation:** A pawn's current standing with their deity is physically manifested via the **Divine Touch** health condition (Hediff), which updates its severity and effects dynamically based on real-time favor fluctuations.
 
-Divine Wrath: Low favor—caused by failed rituals, heretical behavior, or lack of worship—will result in severe mood penalties and the "Divine Wrath" state.
+## 3.0 INGESTION VECTORS (FAVOR ACQUISITION)
 
-Conversion: If a pawn changes their Ideology, their favor is reset to ensure a fresh start with their new faith.
+Pawns can modify their individual Favor metrics upward through three primary operational paths:
 
-Features for Testers
-Debug Mode: Users with Dev Mode enabled have access to a dedicated settings window to manually add/remove favor, force prayer, and check Ideology-wide favor statistics.
+| Vector | Operational Description | Impact Tier |
+| --- | --- | --- |
+| **Rituals** | Structured ideological events. "Spectacular" outcomes grant major positive deltas. Failed execution or the presence of heretics (non-believers) incurs severe penalties. | High (Variable) |
+| **Prayer** | Steady, reliable accumulation of favor achieved when a pawn actively executes prayer subroutines at an authorized Stele structure. | Continuous (Low) |
+| **Daily Devotion** | Minor, passive step-increases triggered by positive thoughts tied directly to the Ideology's core precepts, rewarding compliant lifestyles. | Constant (Minimal) |
 
-License
-This software is provided under the BSD 2-Clause License. See the LICENSE file for details.
+## 4.0 SYSTEM OUTPUTS & CONSEQUENCES
+
+Fluctuations in a pawn's favor metric will trigger automated environmental and psychological shifts:
+
+* **Divine Grace:** Maintaining a high favor metric rewards the faithful pawn with positive mood optimization buffs.
+* **Divine Wrath:** Low favor metrics—resulting from failed rituals, heretical behavior, or prolonged worship neglect—induce severe mood penalties and force the pawn into the **Divine Wrath** operational state.
+* **Conversion Protocol:** If a pawn undergoes an Ideology shift, the system executes an automated favor reset. Legacy data is purged to establish a clean baseline with the newly adopted faith.
+
+## 5.0 DIAGNOSTIC & TELEMETRY TOOLS
+
+For testing and simulation validation, developers can utilize integrated debugging features:
+
+* **Debug Mode Interface:** Users operating with the host application's `Dev Mode` enabled gain access to a dedicated settings console.
+* **Available Overrides:** The diagnostic console permits manual favor inflation/deflation, forced pawn prayer initialization, and real-time visualization of ideology-wide favor statistics.
+
+## 6.0 LEGAL & COMPLIANCE
+
+**DISTRIBUTION NOTICE:** This software framework is provided under the terms of the BSD 2-Clause License. Refer to the root `LICENSE` file for full distribution rights and liability limitations.
