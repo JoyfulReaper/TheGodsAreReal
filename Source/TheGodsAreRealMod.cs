@@ -31,6 +31,7 @@ using Verse;
 
 namespace TheGodsAreReal
 {
+    [StaticConstructorOnStartup]
     public class TheGodsAreRealMod : Mod
     {
         public static TheGodsAreRealSettings Settings;
